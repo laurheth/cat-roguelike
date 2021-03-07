@@ -4,6 +4,74 @@ html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}bo
 
 .visuallyHidden:not(:focus):not(:active) { position: absolute; width: 1px; height: 1px; margin: -1px;border: 0;padding: 0;white-space: nowrap;clip-path: inset(100%);clip: rect(00 0 0);overflow: hidden;}
 
-.display {
+/* Typographic styles */
+html {
+    font-size: 62.5%;
+}
+
+body {
+    background-color: black;
+    color: white;
+    font-size: 2rem;
+}
+
+/* Stripping styles */
+h2,h3,p,ul,li {
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    list-style:none;
+}
+
+/* Wrapper */
+.wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Overall structure */
+main {
+    display: flex;
     height: 100vh;
+    border: 2px solid red;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    flex-grow:1;
+}
+
+/* Status bar */
+.statusBar {
+    border: 2px solid red;
+    min-width: 12em;
+    height: 100vh;
+    padding: 10px;
+}
+
+.statusBar h2, .statusBar h3, .statusBar li, .statusBar p {
+    margin: 10px 0;
+}
+
+/* The display */
+.display {
+    flex-grow: 1;
+    border: 2px solid red;
+}
+
+/* Messages */
+.messages {
+    height: 30vh;
+    min-height: calc(100vh - 800px);
+    border: 2px solid red;
+    padding: 0 10px;
+    overflow: hidden;
+}
+
+.messages li {
+    margin: 10px 0;
 }

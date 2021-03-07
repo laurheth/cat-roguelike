@@ -8,7 +8,34 @@
     <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-    <div id="display" class="display"></div>
+    <div class="wrapper">
+        <main>
+            <!-- Game info / player status -->
+            <div class="statusBar">
+                <h2>Jim the cat</h2>
+                <h3>Status:</h3>
+                <ul>
+                    <li>Fear: 0/10</li>
+                    <li>Hunger: 0/10</li>
+                    <li>Sharpness: 10/10</li>
+                </ul>
+                <h3>Holding in mouth:</h3>
+                <p>Weird bug</p>
+            </div>
+            <div class="column">
+                <!-- Display -->
+                <div id="display" class="display"></div>
+                <!-- Messages display to the player -->
+                <div class="messages">
+                    <ul>
+                        <li>Something happens!</li>
+                        <li>Something else!</li>
+                        <li>Whaaat?</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
     <script src="./script.js" type="module"></script>
 </body>
 </html>
