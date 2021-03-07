@@ -1,0 +1,32 @@
+{
+  "name": "cat-roguelike",
+  "version": "1.0.0",
+  "description": "A cat themed roguelike for 7drl 2021",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build-dev",
+    "build-dev": "webpack --mode development",
+    "build-prod": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laurheth/cat-roguelike.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laurheth/cat-roguelike/issues"
+  },
+  "homepage": "https://github.com/laurheth/cat-roguelike#readme",
+  "dependencies": {
+    "roguelike-pumpkin-patch": "^1.0.0",
+    "ts-loader": "^8.0.17",
+    "typescript": "^4.2.3",
+    "webpack": "^5.24.3"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.5.0"
+  }
+}
