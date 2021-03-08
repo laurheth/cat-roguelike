@@ -2,6 +2,7 @@ import { Display } from 'roguelike-pumpkin-patch';
 import FOV from './FOV';
 import RoomBuilder from './RoomBuilder';
 import Tile from './Tile';
+import Player from './Player';
 
 const displayDiv:HTMLElement|null = document.getElementById("display");
 
@@ -32,23 +33,26 @@ if (displayDiv) {
 
     const fov = new FOV(
         (tile:Tile) => {
-            return tile.content !== '#';
+            return tile.seeThrough;
         },
         ([x,y],tile:Tile) => {
-            if (tile.content) {
-                display.setTile(center[0]+x, center[1]+y, tile.content);
+            if (tile.getTile()) {
+                display.setTile(center[0]+x, center[1]+y, tile.getTile());
             }
         }
     );
     
-    const x = 1;
-    const y = 1;
+    const x = 2;
+    const y = 2;
     const tile = tileMap[y][x];
+    console.log(tile);
     if(tile) {
-        tile.content = '@';
-        console.log(tile);
+        const player = new Player({
+            startTile:tile,
+            appearance:'@',
+        });
+        console.log(tile.enterTile(player));
         fov.look(tile);
     }
-
     console.log(tileMap);
 }
