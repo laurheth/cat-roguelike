@@ -20,8 +20,8 @@ export default class Tile {
     private neighbours:Neighbours;
     private appearance:Appearance;
     private critter:Critter|null;
-    readonly passable:boolean;
-    readonly seeThrough:boolean;
+    public passable:boolean;
+    public seeThrough:boolean;
     private seen:boolean;
     constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
@@ -72,6 +72,10 @@ export default class Tile {
         }
     }
 
+    public setTile(appearance:Appearance) {
+        this.appearance = appearance;
+    }
+
     /** Check if a tile has been seen */
     public wasSeen() {
         return this.seen;
@@ -113,6 +117,32 @@ export default class Tile {
             return returnList;
         } else {
             return [];
+        }
+    }
+
+    /** Make sure neighbours are correct */
+    public reconcileNeighbours() {
+        for(let i=-1;i<2;i++) {
+            for(let j=-1;j<2;j++) {
+                if (i===0 && j===0) {
+                    continue;
+                }
+                const neighbour1 = this.getNeighbour([i,j]);
+                if(neighbour1) {
+                    for(let ii=-1;ii<2;ii++) {
+                        for(let jj=-1;jj<2;jj++) {
+                            if (i+ii === 0 && j+jj === 0) {
+                                continue;
+                            }
+                            const neighbour2 = this.getNeighbour([i+ii,j+jj]);
+                            if (neighbour2) {
+                                neighbour1.addNeighbour([ii,jj],neighbour2);
+                                neighbour2.addNeighbour([-ii,-jj],neighbour1);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

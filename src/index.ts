@@ -1,6 +1,6 @@
-import { Display, EventManager } from 'roguelike-pumpkin-patch';
+import { Display, EventManager, Random } from 'roguelike-pumpkin-patch';
 import FOV from './FOV';
-import RoomBuilder from './RoomBuilder';
+import RoomBuilder, { hallBuilder } from './RoomBuilder';
 import {default as Tile, RememberTile } from './Tile';
 import Player from './Player';
 import { isFunctionExpression } from 'typescript';
@@ -14,25 +14,21 @@ if (displayDiv) {
     const center = [Math.ceil(displayWidth/2),Math.ceil(displayHeight/2)];
     display.tileSize = display.calculateTileSize();
 
+    const random = new Random();
+
     const testRoom = [
-        "#######################",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#.....................#",
-        "#######################",
+        "########",
+        "#......#",
+        "#......#",
+        "#......#",
+        "#......#",
+        "#......#",
+        "#......#",
+        "########",
     ];
 
     const tileMap = RoomBuilder(testRoom.map(row=>row.split('')));
+    const tileMap2 = RoomBuilder(testRoom.map(row=>row.split('')));
 
     const fov = new FOV(
         (tile:Tile) => {
@@ -81,7 +77,8 @@ if (displayDiv) {
     const tile = tileMap[y][x];
     const event = new EventManager({type:'simple'});
 
-    
+    hallBuilder(tileMap,tileMap2,random);
+
     if(tile) {
         const player = new Player({
             startTile:tile,

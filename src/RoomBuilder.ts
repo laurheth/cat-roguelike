@@ -1,5 +1,6 @@
 import Tile from './Tile';
 import { Appearance } from './commonInterfaces';
+import { Random } from 'roguelike-pumpkin-patch';
 
 const nonSeeThrough = ['#'];
 const nonPassable = ['#'];
@@ -55,4 +56,159 @@ const RoomBuilder = (
     return tileMap;
 };
 
-export default RoomBuilder;
+// export default RoomBuilder;
+
+const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
+        theme:{[key:string]:string[]} = {'#':['wall'],'.':['floor']},
+        range:[number,number]=[1,5],
+    ) => {
+    // Find appropriate connection points in room1 and room2
+    const room1:Tile[] = [];
+    const room2:Tile[] = [];
+    room12d.forEach(row=>row.forEach(col=>{
+        if(col){room1.push(col)}
+    }));
+    room22d.forEach(row=>row.forEach(col=>{
+        if(col){room2.push(col)}
+    }));
+    room1.sort(()=>rng.getRandom()-0.5);
+    room2.sort(()=>rng.getRandom()-0.5);
+
+    const dirs = [[-1,0],[1,0],[0,1],[0,-1]];
+    const startDirection = [0,0];
+    const endDirection = [0,0];
+    const tile1 = room1.find((tile)=>{
+        if (!tile.passable) {
+            const neighbours = dirs.map(dir=>tile.getNeighbour(dir));
+            if( neighbours[0] && !neighbours[0].passable && neighbours[1] && !neighbours[1].passable ) {
+                if (neighbours[2] && neighbours[2].passable) {
+                    startDirection[1] = -1;
+                    return true;
+                } else if (neighbours[3] && neighbours[3].passable) {
+                    startDirection[1] = 1;
+                    return true;
+                }
+            } else if( neighbours[2] && !neighbours[2].passable && neighbours[3] && !neighbours[3].passable ) {
+                if (neighbours[0] && neighbours[0].passable) {
+                    startDirection[0] = 1;
+                    return true;
+                } else if (neighbours[1] && neighbours[1].passable) {
+                    startDirection[0] = -1;
+                    return true;
+                }
+            }
+            return false;
+        }
+    });
+    const tile2 = room2.find((tile)=>{
+        if (!tile.passable) {
+            const neighbours = dirs.map(dir=>tile.getNeighbour(dir));
+            if( neighbours[0] && !neighbours[0].passable && neighbours[1] && !neighbours[1].passable ) {
+                if (neighbours[2] && neighbours[2].passable) {
+                    endDirection[1] = 1;
+                    return true;
+                } else if (neighbours[3] && neighbours[3].passable) {
+                    endDirection[1] = -1;
+                    return true;
+                }
+            } else if( neighbours[2] && !neighbours[2].passable && neighbours[3] && !neighbours[3].passable ) {
+                if (neighbours[0] && neighbours[0].passable) {
+                    endDirection[0] = -1;
+                    return true;
+                } else if (neighbours[1] && neighbours[1].passable) {
+                    endDirection[0] = 1;
+                    return true;
+                }
+            }
+            return false;
+        }
+    });
+
+    // Check we found tiles, otherwise, damn
+    if (!tile1 || !tile2) {
+        return false;
+    }
+    console.log(tile1,tile2,startDirection,endDirection);
+    // Now, carve a hallway from start to finish
+    let recentlyTurned = true;
+    let currentTile = tile1;
+
+    const carve = (tile:Tile) => {
+        tile.passable = true;
+        tile.seeThrough = true;
+        if(theme['.']) {
+            tile.setTile({
+                content:'.',
+                classList:theme['.']
+            });
+        } else {
+            tile.setTile({
+                content:'.',
+                classList:[]
+            });
+        }
+        const wallTheme:Appearance = {
+            content:'#',
+            classList:[]
+        }
+        if (theme['#']) {
+            wallTheme.classList = theme['#'];
+        }
+        for(let i=-1;i<2;i++) {
+            for (let j=-1;j<2;j++) {
+                if (i===0 && j===0) {
+                    continue;
+                }
+                let otherTile = tile.getNeighbour([i,j]);
+                if(!otherTile) {
+                    otherTile = new Tile({},wallTheme,false,false);
+                    tile.addNeighbour([i,j],otherTile);
+                    otherTile.addNeighbour([-i,-j],tile);
+                }
+            }
+        }
+        tile.reconcileNeighbours();
+    }
+    let steps=rng.getNumber(...range);
+    const direction = [...startDirection];
+    let limiter=100;
+
+    while(limiter > 0 && (!direction.every((x,i)=>x===endDirection[i]) || recentlyTurned)) {
+        limiter--;
+        carve(currentTile);
+        if (recentlyTurned) {
+            recentlyTurned = false;
+            steps = rng.getNumber(...range);
+        } else {
+            steps--;
+            if (steps<=0) {
+                if (rng.getRandom()>0.5) {
+                    [direction[0],direction[1]] = [Math.round(direction[1]),Math.round(-direction[0])];
+                } else {
+                    [direction[0],direction[1]] = [Math.round(-direction[1]),Math.round(direction[0])];
+                }
+                recentlyTurned = true;
+            }
+        }
+        const nextTile = currentTile.getNeighbour(direction);
+        if (nextTile) {
+            currentTile = nextTile;
+        } else {
+            // oh no!
+            return false;
+        }
+    }
+    // Finally, connect the other end
+    console.log(direction,currentTile,tile2);
+    if (currentTile) {
+        currentTile.addNeighbour(direction,tile2);
+        tile2.addNeighbour(direction.map(x=>-x),currentTile);
+        carve(currentTile);
+        carve(tile2);
+        console.log(tile2);
+        return true;
+    }
+    return false;
+}
+
+export { RoomBuilder as default, hallBuilder };
