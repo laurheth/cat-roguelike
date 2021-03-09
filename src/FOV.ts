@@ -6,19 +6,22 @@ import Tile from './Tile';
 export default class FOV {
     private lightPasses:(tile:Tile)=>boolean;
     private seeTile:(displayPosition:Array<number>,tile:Tile)=>void;
+    private clearView:(tile:Tile)=>void;
     private range:number;
     private angleStepDensity:number;
 
-    constructor(lightPasses:(tile:Tile)=>boolean, seeTile:(displayPosition:Array<number>,tile:Tile)=>void, range=8, angleStepDensity=1) {
+    constructor(lightPasses:(tile:Tile)=>boolean, seeTile:(displayPosition:Array<number>,tile:Tile)=>void, clearView:(tile:Tile)=>void, range=8, angleStepDensity=1) {
 
         this.lightPasses = lightPasses;
         this.seeTile = seeTile;
+        this.clearView = clearView;
         this.range = range;
         this.angleStepDensity = 1/angleStepDensity;
     }
 
     /** Takes a starting tile and computes FOV from it. */
     public look(startTile:Tile) {
+        this.clearView(startTile);
         const displayPosition:Array<number> = [0,0];
         const seeThroughKnown:Array<Tile> = [startTile];
         const blockingKnown:Array<Tile> = [];

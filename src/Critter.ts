@@ -1,18 +1,19 @@
 import Tile from './Tile';
+import { Appearance } from './commonInterfaces';
 
 export interface CritterParams {
     startTile:Tile;
-    appearance:string;
+    appearance:Appearance;
     onDamage?:(attacker:Critter)=>void;
     onDie?:()=>void;
 }
 
 /** Anything that moves around and does stuff */
 export default class Critter {
-    private currentTile:Tile;
-    private _appearance:string;
-    private onDamage?:(attacker:Critter)=>void;
-    private onDie?:()=>void;
+    protected currentTile:Tile;
+    protected _appearance:Appearance;
+    protected onDamage?:(attacker:Critter)=>void;
+    protected onDie?:()=>void;
     constructor(params:CritterParams) {
         const {
             startTile,
@@ -23,12 +24,13 @@ export default class Critter {
         } = params;
 
         this.currentTile = startTile;
+        this.currentTile.enterTile(this);
         this._appearance = appearance;
         this.onDamage = onDamage;
         this.onDie = onDie;
     }
 
-    get appearance():string {
+    get appearance():Appearance {
         return this._appearance;
     }
 
@@ -45,6 +47,7 @@ export default class Critter {
                 this.currentTile.exitTile();
                 // Update our position
                 this.currentTile = moveTo;
+                return true;
             }
         }
         return false;

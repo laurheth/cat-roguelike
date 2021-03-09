@@ -1,5 +1,6 @@
 import { textChangeRangeIsUnchanged } from 'typescript';
 import Critter from './Critter';
+import { Appearance } from './commonInterfaces';
 
 interface Neighbours {
     [key:string]:Tile;
@@ -7,21 +8,28 @@ interface Neighbours {
 
 type Step = number[];
 
+export interface RememberTile {
+    position:[number,number];
+    tile:Tile;
+}
+
 /**
  * Slightly esoteric tile definition, but I think it might be fun.
  */
 export default class Tile {
     private neighbours:Neighbours;
-    private appearance:any;
+    private appearance:Appearance;
     private critter:Critter|null;
     readonly passable:boolean;
     readonly seeThrough:boolean;
-    constructor(neighours:Neighbours,appearance:any, passable:boolean, seeThrough:boolean) {
+    private seen:boolean;
+    constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
         this.appearance = appearance;
         this.critter = null;
         this.passable = passable;
         this.seeThrough = seeThrough;
+        this.seen=false;
     }
 
     /** Get neigjbour tile along a direction */
@@ -46,12 +54,27 @@ export default class Tile {
     }
 
     /** Get what the tile should look like on the display */
-    public getTile() {
+    public getTile(direct=true):Appearance {
+        this.seen = true;
+        let appearance:Appearance;
         if (this.critter) {
-            return this.critter.appearance;
+            appearance = this.critter.appearance;
         } else {
-            return this.appearance;
+            appearance = this.appearance;
         }
+        if (!direct) {
+            return {
+                content:appearance.content,
+                classList:[...appearance.classList, 'memory']
+            };
+        } else {
+            return appearance;
+        }
+    }
+
+    /** Check if a tile has been seen */
+    public wasSeen() {
+        return this.seen;
     }
 
     /** Attempt to move a critter into the tile */
@@ -69,5 +92,27 @@ export default class Tile {
     /** Clear critter from the tile */
     public exitTile() {
         this.critter = null;
+    }
+
+    /** Tile memory */
+    public remember([x,y]:[number,number], toRemember:any[][]):RememberTile[] {
+        if (this.seen && toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
+            toRemember[y][x]=this.getTile(false);
+            const returnList:RememberTile[] = [];
+            for(let i=-1;i<2;i++) {
+                for(let j=-1;j<2;j++) {
+                    const nextTile = this.getNeighbour([i,j]);
+                    if (nextTile) {
+                        returnList.push({
+                            position:[x+i,y+j],
+                            tile:nextTile
+                        });
+                    }
+                }
+            }
+            return returnList;
+        } else {
+            return [];
+        }
     }
 }

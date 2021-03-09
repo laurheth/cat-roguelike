@@ -75,3 +75,22 @@ main {
 .messages li {
     margin: 10px 0;
 }
+
+/* Tiles */
+.wall {
+    background: brown;
+    color: wheat;
+}
+
+.floor {
+    background: black;
+    color: white;
+}
+
+.player {
+    color: white;
+}
+
+.memory {
+    filter:grayscale();
+}

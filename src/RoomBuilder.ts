@@ -1,4 +1,5 @@
 import Tile from './Tile';
+import { Appearance } from './commonInterfaces';
 
 const nonSeeThrough = ['#'];
 const nonPassable = ['#'];
@@ -7,12 +8,22 @@ const nonPassable = ['#'];
  * Takes a 2d array and builds some interconnected tiles with it.
  * This bullshit tile system will not be practical without a helper function like this.
  */
-const RoomBuilder = (room:Array<Array<any>>) => {
+const RoomBuilder = (
+    room:Array<Array<string>>,
+    theme:{[key:string]:string[]} = {'#':['wall'],'.':['floor']}
+    ) => {
     // Make a 2d array of tiles
     const tileMap = room.map(row=>{
         return row.map(x=>{
             if (x && x !== " ") {
-                return new Tile({},x,!nonPassable.includes(x),!nonSeeThrough.includes(x));
+                const appearance:Appearance = {
+                    content:x,
+                    classList:[]
+                }
+                if (theme[x]) {
+                    appearance.classList = theme[x];
+                }
+                return new Tile({},appearance,!nonPassable.includes(x),!nonSeeThrough.includes(x));
             } else {
                 return null;
             }
