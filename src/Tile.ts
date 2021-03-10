@@ -19,19 +19,21 @@ export interface RememberTile {
 export default class Tile {
     private neighbours:Neighbours;
     private appearance:Appearance;
+    private lastSeenAppearance:Appearance;
     private critter:Critter|null;
     public passable:boolean;
     public seeThrough:boolean;
-    public remembered:boolean;
+    public remembered:number;
     private seen:boolean;
     constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
         this.appearance = appearance;
+        this.lastSeenAppearance = appearance;
         this.critter = null;
         this.passable = passable;
         this.seeThrough = seeThrough;
         this.seen=false;
-        this.remembered=false;
+        this.remembered=1;
     }
 
     /** Get neigjbour tile along a direction */
@@ -58,18 +60,19 @@ export default class Tile {
     /** Get what the tile should look like on the display */
     public getTile(direct=true):Appearance {
         this.seen = true;
-        let appearance:Appearance;
-        if (this.critter) {
-            appearance = this.critter.appearance;
-        } else {
-            appearance = this.appearance;
-        }
         if (!direct) {
             return {
-                content:appearance.content,
-                classList:[...appearance.classList, 'memory']
+                content:this.lastSeenAppearance.content,
+                classList:[...this.lastSeenAppearance.classList, 'memory']
             };
         } else {
+            let appearance:Appearance;
+            if (this.critter) {
+                appearance = this.critter.appearance;
+            } else {
+                appearance = this.appearance;
+            }
+            this.lastSeenAppearance = appearance;
             return appearance;
         }
     }
@@ -101,9 +104,9 @@ export default class Tile {
     }
 
     /** Tile memory */
-    public remember([x,y]:[number,number], toRemember:any[][]):RememberTile[] {
+    public remember([x,y]:[number,number], toRemember:any[][],distance:number):RememberTile[] {
         if (this.seen && !this.remembered) {
-            this.remembered = true;
+            this.remembered = distance+1;
             if(toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
                 toRemember[y][x]=this.getTile(false);
             }

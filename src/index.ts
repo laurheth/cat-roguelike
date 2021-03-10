@@ -28,7 +28,7 @@ if (displayDiv) {
         },
         (tile:Tile) => {
 
-            map.allTiles.forEach(tile=>tile.remembered=false);
+            map.allTiles.forEach(tile=>tile.remembered=0);
 
             const toDisplay:any[][] = [];
             for(let i=0;i<displayWidth;i++) {
@@ -48,7 +48,7 @@ if (displayDiv) {
             while(distance < 50) {
                 const nextRememberList:RememberTile[] = []
                 rememberList.forEach(x=>{
-                    x.tile.remember(x.position,toDisplay).forEach(y=>{
+                    x.tile.remember(x.position,toDisplay,distance).forEach(y=>{
                         nextRememberList.push(y);
                     });
                 });
