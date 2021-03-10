@@ -4,6 +4,7 @@ import RoomBuilder, { hallBuilder } from './RoomBuilder';
 import {default as Tile, RememberTile } from './Tile';
 import Player from './Player';
 import MapGenerator from './MapGenerator';
+import Foe from './Foe';
 
 const displayDiv:HTMLElement|null = document.getElementById("display");
 
@@ -75,7 +76,13 @@ if (displayDiv) {
             },
             fov: fov,
         });
+        const foe = new Foe({
+            type:'bug',
+            startTile: random.getRandomElement(map.allTiles.filter(x=>x.passable)),
+            rng:random
+        })
         event.add(player);
+        event.add(foe);
         const go = async ()=>{
             while(1===1) {
                 await event.advance();
