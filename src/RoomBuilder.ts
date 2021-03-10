@@ -58,25 +58,15 @@ const RoomBuilder = (
 
 // export default RoomBuilder;
 
-const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
+const hallBuilder = (room1:Tile[],room2:Tile[],rng:Random,
         theme:{[key:string]:string[]} = {'#':['wall'],'.':['floor']},
         range:[number,number]=[1,5],
     ) => {
     // Find appropriate connection points in room1 and room2
-    const room1:Tile[] = [];
-    const room2:Tile[] = [];
-    room12d.forEach(row=>row.forEach(col=>{
-        if(col){room1.push(col)}
-    }));
-    room22d.forEach(row=>row.forEach(col=>{
-        if(col){room2.push(col)}
-    }));
-    room1.sort(()=>rng.getRandom()-0.5);
-    room2.sort(()=>rng.getRandom()-0.5);
-
     const dirs = [[-1,0],[1,0],[0,1],[0,-1]];
     const startDirection = [0,0];
     const endDirection = [0,0];
+    room1.sort(()=>rng.getRandom()-0.5);
     const tile1 = room1.find((tile)=>{
         if (!tile.passable) {
             const neighbours = dirs.map(dir=>tile.getNeighbour(dir));
@@ -100,6 +90,7 @@ const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
             return false;
         }
     });
+    room2.sort(()=>rng.getRandom()-0.5);
     const tile2 = room2.find((tile)=>{
         if (!tile.passable) {
             const neighbours = dirs.map(dir=>tile.getNeighbour(dir));
@@ -125,13 +116,14 @@ const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
     });
 
     // Check we found tiles, otherwise, damn
-    if (!tile1 || !tile2) {
+    if (!tile1 || !tile2 || tile1 === tile2) {
         return false;
     }
-    console.log(tile1,tile2,startDirection,endDirection);
     // Now, carve a hallway from start to finish
     let recentlyTurned = true;
     let currentTile = tile1;
+
+    const allAddedTiles:Tile[] = [];
 
     const carve = (tile:Tile) => {
         tile.passable = true;
@@ -162,6 +154,7 @@ const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
                 let otherTile = tile.getNeighbour([i,j]);
                 if(!otherTile) {
                     otherTile = new Tile({},wallTheme,false,false);
+                    allAddedTiles.push(otherTile);
                     tile.addNeighbour([i,j],otherTile);
                     otherTile.addNeighbour([-i,-j],tile);
                 }
@@ -206,7 +199,7 @@ const hallBuilder = (room12d:(Tile|null)[][],room22d:(Tile|null)[][],rng:Random,
         carve(currentTile);
         carve(tile2);
         console.log(tile2);
-        return true;
+        return allAddedTiles;
     }
     return false;
 }

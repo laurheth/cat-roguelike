@@ -22,6 +22,7 @@ export default class Tile {
     private critter:Critter|null;
     public passable:boolean;
     public seeThrough:boolean;
+    public remembered:boolean;
     private seen:boolean;
     constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
@@ -30,6 +31,7 @@ export default class Tile {
         this.passable = passable;
         this.seeThrough = seeThrough;
         this.seen=false;
+        this.remembered=false;
     }
 
     /** Get neigjbour tile along a direction */

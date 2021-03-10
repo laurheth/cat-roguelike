@@ -3,7 +3,7 @@ import FOV from './FOV';
 import RoomBuilder, { hallBuilder } from './RoomBuilder';
 import {default as Tile, RememberTile } from './Tile';
 import Player from './Player';
-import { isFunctionExpression } from 'typescript';
+import MapGenerator from './MapGenerator';
 
 const displayDiv:HTMLElement|null = document.getElementById("display");
 
@@ -15,20 +15,6 @@ if (displayDiv) {
     display.tileSize = display.calculateTileSize();
 
     const random = new Random();
-
-    const testRoom = [
-        "########",
-        "#......#",
-        "#......#",
-        "#......#",
-        "#......#",
-        "#......#",
-        "#......#",
-        "########",
-    ];
-
-    const tileMap = RoomBuilder(testRoom.map(row=>row.split('')));
-    const tileMap2 = RoomBuilder(testRoom.map(row=>row.split('')));
 
     const fov = new FOV(
         (tile:Tile) => {
@@ -72,12 +58,8 @@ if (displayDiv) {
         }
     );
     
-    const x = 2;
-    const y = 2;
-    const tile = tileMap[y][x];
+    const tile = MapGenerator(1,random);
     const event = new EventManager({type:'simple'});
-
-    hallBuilder(tileMap,tileMap2,random);
 
     if(tile) {
         const player = new Player({
