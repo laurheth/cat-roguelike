@@ -1,16 +1,24 @@
+import Tile from './Tile';
 import { default as Critter, CritterParams } from './Critter';
 import FOV from './FOV';
 
-interface PlayerParams extends CritterParams {
+interface PlayerParams  {
     fov:FOV;
+    startTile:Tile;
 }
 
 /** The player */
 export default class Player extends Critter {
     readonly fov:FOV;
     constructor(params:PlayerParams) {
-        const { fov, ...rest } = params;
-        super(rest);
+        const { fov, startTile, ...rest } = params;
+        super({
+            startTile:startTile,
+            appearance:{
+                content:'<img src="./assets/cat.png" alt="A very good cat.">',
+                classList:['player']
+            }
+        });
 
         this.fov = fov;
     }

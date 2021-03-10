@@ -63,6 +63,15 @@ main {
     border: 2px solid red;
 }
 
+/* Make images match the size of the surrounding text */
+.display img {
+    width: 1em;
+    height: 1em;
+    object-fit:contain;
+    object-position: center;
+    display: block;
+}
+
 /* Messages */
 .messages {
     height: 30vh;
@@ -90,6 +99,10 @@ main {
 
 .player {
     color: white;
+}
+
+.left {
+    transform:scaleX(-1);
 }
 
 .memory {

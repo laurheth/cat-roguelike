@@ -14,6 +14,7 @@ export default class Critter {
     protected _appearance:Appearance;
     protected onDamage?:(attacker:Critter)=>void;
     protected onDie?:()=>void;
+    private lookLeft:boolean;
     constructor(params:CritterParams) {
         const {
             startTile,
@@ -28,29 +29,49 @@ export default class Critter {
         this._appearance = appearance;
         this.onDamage = onDamage;
         this.onDie = onDie;
+        this.lookLeft=false;
     }
 
     get appearance():Appearance {
-        return this._appearance;
+        return this.getAppearance();
     }
 
-    public step(dx:-1|0|1, dy:-1|0|1):boolean {
+    protected getAppearance():Appearance {
+        if (this.lookLeft) {
+            return {
+                content:this._appearance.content,
+                classList:['left',...this._appearance.classList]
+            }
+        } else {
+            return this._appearance;
+        }
+    }
+
+    public step(dx:number, dy:number):boolean {
         const step:number[] = [dx,dy];
+        let moveSuccess = false;
         const moveTo = this.currentTile.getNeighbour(step);
         if (moveTo) {
             const result = moveTo.enterTile(this);
             if (result instanceof Critter) {
                 // interaction of some sort
-                return true;
+                moveSuccess = true;
             } else if (result) {
                 // Success, new tile contains us. Leave old tile
                 this.currentTile.exitTile();
                 // Update our position
                 this.currentTile = moveTo;
-                return true;
+                moveSuccess = true;
             }
         }
-        return false;
+        if(moveSuccess) {
+            if (dx < 0 || dy < 0) {
+                this.lookLeft=true;
+            } else {
+                this.lookLeft=false;
+            }
+        }
+        return moveSuccess;
     }
 
     /** Stub. */

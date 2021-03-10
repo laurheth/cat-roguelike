@@ -113,6 +113,9 @@ export default class Tile {
             const returnList:RememberTile[] = [];
             for(let i=-1;i<2;i++) {
                 for(let j=-1;j<2;j++) {
+                    if (Math.abs(i)+Math.abs(j) !== 1) {
+                        continue;
+                    }
                     const nextTile = this.getNeighbour([i,j]);
                     if (nextTile) {
                         returnList.push({

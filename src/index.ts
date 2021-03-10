@@ -9,9 +9,9 @@ import Foe from './Foe';
 const displayDiv:HTMLElement|null = document.getElementById("display");
 
 if (displayDiv) {
-    const displayWidth=31;
-    const displayHeight=31;
-    const display = new Display({target:displayDiv, width: 31, height: 31});
+    const displayWidth=15;
+    const displayHeight=15;
+    const display = new Display({target:displayDiv, width: displayWidth, height: displayHeight});
     const center = [Math.ceil(displayWidth/2),Math.ceil(displayHeight/2)];
     display.tileSize = display.calculateTileSize();
 
@@ -62,7 +62,7 @@ if (displayDiv) {
                    display.setTile(i,j,toDisplay[j][i]);
                 }
             }
-        }
+        },7
     );
 
     const event = new EventManager({type:'simple'});
@@ -70,14 +70,10 @@ if (displayDiv) {
     if(tile) {
         const player = new Player({
             startTile:tile,
-            appearance:{
-                content:'@',
-                classList:['player'],
-            },
             fov: fov,
         });
         const foe = new Foe({
-            type:'bug',
+            type:'mouse',
             startTile: random.getRandomElement(map.allTiles.filter(x=>x.passable)),
             rng:random
         })
