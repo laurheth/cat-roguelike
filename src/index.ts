@@ -15,6 +15,9 @@ if (displayDiv) {
     display.tileSize = display.calculateTileSize();
 
     const random = new Random();
+        
+    const map = MapGenerator(1,random);
+    const tile = map.startTile;
 
     const fov = new FOV(
         (tile:Tile) => {
@@ -24,6 +27,9 @@ if (displayDiv) {
             display.setTile(center[0]+x, center[1]+y, tile.getTile());
         },
         (tile:Tile) => {
+
+            map.allTiles.forEach(tile=>tile.remembered=false);
+
             const toDisplay:any[][] = [];
             for(let i=0;i<displayWidth;i++) {
                 const row:any = []
@@ -57,8 +63,7 @@ if (displayDiv) {
             }
         }
     );
-    
-    const tile = MapGenerator(1,random);
+
     const event = new EventManager({type:'simple'});
 
     if(tile) {

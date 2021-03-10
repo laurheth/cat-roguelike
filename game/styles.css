@@ -85,6 +85,7 @@ main {
 .floor {
     background: black;
     color: white;
+    font-weight: bold;
 }
 
 .player {
@@ -92,5 +93,6 @@ main {
 }
 
 .memory {
-    filter:grayscale();
+    filter:grayscale(90%) brightness(70%);
+    font-weight: normal;
 }

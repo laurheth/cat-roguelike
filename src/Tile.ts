@@ -102,8 +102,11 @@ export default class Tile {
 
     /** Tile memory */
     public remember([x,y]:[number,number], toRemember:any[][]):RememberTile[] {
-        if (this.seen && toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
-            toRemember[y][x]=this.getTile(false);
+        if (this.seen && !this.remembered) {
+            this.remembered = true;
+            if(toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
+                toRemember[y][x]=this.getTile(false);
+            }
             const returnList:RememberTile[] = [];
             for(let i=-1;i<2;i++) {
                 for(let j=-1;j<2;j++) {

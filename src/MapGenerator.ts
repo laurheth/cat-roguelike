@@ -29,7 +29,7 @@ const themes:{[key:string]:string[]}[] = [
 ];
 
 /** Function to generate a map */
-const generateMap:(level:number,rng:Random)=>Tile = (level:number, rng:Random)=>{
+const generateMap = (level:number, rng:Random)=>{
     const hallTheme = rng.getRandomElement(themes);
     const roomTheme = rng.getRandomElement(themes);
 
@@ -57,13 +57,16 @@ const generateMap:(level:number,rng:Random)=>Tile = (level:number, rng:Random)=>
         }
         rooms++;
     }
-    for (let i=0;i<targetRooms/3;i++) {
+    for (let i=0;i<targetRooms/4;i++) {
         const success = hallBuilder(allTiles,allTiles,rng,hallTheme);
         if (success && Array.isArray(success) && success.length>0) {
             allTiles.push(...success);
         }
     }
-    return rng.getRandomElement(allTiles.filter(tile=>tile.passable));
+    return {
+        startTile:rng.getRandomElement(allTiles.filter(tile=>tile.passable)),
+        allTiles:allTiles
+    }
 }
 
 export default generateMap;
