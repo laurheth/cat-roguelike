@@ -65,9 +65,9 @@ export default class Critter {
             }
         }
         if(moveSuccess) {
-            if (dx < 0 || dy < 0) {
+            if (dx < 0) {
                 this.lookLeft=true;
-            } else {
+            } else if (dx > 0) {
                 this.lookLeft=false;
             }
         }
