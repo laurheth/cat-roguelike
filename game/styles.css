@@ -36,7 +36,7 @@ ul {
 
 /* Wrapper */
 .wrapper {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -69,6 +69,10 @@ main {
     margin: 10px 0;
 }
 
+.statusBar .item * {
+    transform:none;
+}
+
 .panic {
     color: red;
     font-weight: bold;
@@ -82,6 +86,7 @@ main {
 /* The display */
 .display {
     flex-grow: 1;
+    font-family: 'Ubuntu Mono', monospace;
 }
 
 /* Make images match the size of the surrounding text */
@@ -99,7 +104,7 @@ main {
     min-height: calc(100vh - 800px);
     background: rgb(20,20,20);
     padding: 0 10px;
-    overflow: hidden;
+    overflow-y: scroll;
     border-top: 4px solid rgb(40,40,40);
     width: 100%;
     line-height: 1.4;
@@ -126,12 +131,26 @@ main {
     font-weight: bold;
 }
 
+.critter {
+    color: white;
+    font-weight: normal;
+}
+
 .player {
     color: white;
+    font-weight: normal;
 }
 
 .left {
     transform:scaleX(-1);
+}
+
+.dead {
+    transform:scaleY(-1);
+}
+
+.blood {
+    background: darkred;
 }
 
 .memory {

@@ -19,7 +19,12 @@ export default class Critter {
             ...rest
         } = params;
 
-        this.currentTile = startTile;
+        const possibleTile = startTile.findEmptyNeigbour((tile:Tile)=>!tile.critter);
+        if (possibleTile) {
+            this.currentTile = possibleTile;
+        } else {
+            throw new Error("No available location.")
+        }
         this.currentTile.enterTile(this);
         this._appearance = appearance;
         this.lookLeft=false;

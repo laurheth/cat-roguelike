@@ -2,6 +2,7 @@ import Tile from './Tile';
 import {default as Critter, CritterParams } from './Critter';
 import { EventManager, Random } from 'roguelike-pumpkin-patch';
 import Player from './Player';
+import Item from './Item';
 
 interface FoeParams {
     type:string;
@@ -50,7 +51,7 @@ export default class Foe extends Critter {
                 hp = 4;
                 break;
         }
-
+        critterParams.appearance.classList.push('critter');
         super(critterParams);
         this.event = event;
         this.event.add(this);
@@ -115,6 +116,14 @@ export default class Foe extends Critter {
     }
 
     public die() {
+        const corpse = new Item({
+            appearance:this._appearance,
+            tile:this.currentTile,
+            type:"food",
+            name:`Dead ${this.type}`,
+        });
+        corpse.appearance.classList.push('dead');
+        this.currentTile.addClass("blood");
         super.die();
     }
 }

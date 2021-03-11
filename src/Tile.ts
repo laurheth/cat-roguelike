@@ -1,6 +1,6 @@
-import { textChangeRangeIsUnchanged } from 'typescript';
 import Critter from './Critter';
 import { Appearance } from './commonInterfaces';
+import Item from './Item';
 
 interface Neighbours {
     [key:string]:Tile;
@@ -19,8 +19,10 @@ export interface RememberTile {
 export default class Tile {
     private neighbours:Neighbours;
     private appearance:Appearance;
+    private extraClass:string[];
     private lastSeenAppearance:Appearance;
-    private critter:Critter|null;
+    public critter:Critter|null;
+    public item:Item|null;
     public passable:boolean;
     public seeThrough:boolean;
     public remembered:number;
@@ -30,15 +32,57 @@ export default class Tile {
         this.appearance = appearance;
         this.lastSeenAppearance = appearance;
         this.critter = null;
+        this.item = null;
         this.passable = passable;
         this.seeThrough = seeThrough;
         this.seen=false;
         this.remembered=1;
+        this.extraClass=[];
     }
 
     /** Get neigjbour tile along a direction */
     public getNeighbour(step:Step):Tile|undefined {
         return this.neighbours[this.toKey(step)];
+    }
+
+    /** Get all neighbours */
+    public getNeighbours():Tile[] {
+        const neighbours:Tile[] = [];
+        for(let key in this.neighbours) {
+            if(this.neighbours[key]) {
+                neighbours.push(this.neighbours[key]);
+            }
+        }
+        return neighbours;
+    }
+
+    /** Find empty neighbour */
+    public findEmptyNeigbour(check:(tile:Tile)=>boolean):Tile|undefined {
+        let toReturn:Tile|undefined = undefined;
+        if(check(this)) {
+            toReturn = this;
+        } else {
+            const toCheck:Tile[] = this.getNeighbours();
+            const checked:Tile[] = [this];
+            while(!toReturn && checked.length<50) {
+                if (toCheck.length <= 0) {
+                    break;
+                }
+                const checkThis = toCheck.shift();
+                if (checkThis) {
+                    if(check(checkThis)) {
+                        toReturn = checkThis;
+                    } else {
+                        checkThis.getNeighbours().forEach(x=>{
+                            if(!checked.includes(x) && !toCheck.includes(x)) {
+                                toCheck.push(x);
+                            }
+                        })
+                    }
+                }
+            }
+        }
+        return toReturn;
     }
 
     /** Translate a step into a string key */
@@ -68,9 +112,22 @@ export default class Tile {
         } else {
             let appearance:Appearance;
             if (this.critter) {
-                appearance = this.critter.appearance;
+                const critterAppearance = this.critter.appearance;
+                appearance = {
+                    content: critterAppearance.content,
+                    classList:[...critterAppearance.classList,...this.appearance.classList,...this.extraClass]
+                };
+            } else if (this.item) {
+                const itemAppearance = this.item.appearance;
+                appearance = {
+                    content: itemAppearance.content,
+                    classList:[...itemAppearance.classList,...this.appearance.classList,...this.extraClass]
+                };
             } else {
-                appearance = this.appearance;
+                appearance = {
+                    content:this.appearance.content,
+                    classList:[...this.appearance.classList,...this.extraClass]
+                };
             }
             this.lastSeenAppearance = appearance;
             return appearance;
@@ -79,6 +136,14 @@ export default class Tile {
 
     public setTile(appearance:Appearance) {
         this.appearance = appearance;
+    }
+
+    public addClass(className:string) {
+        this.extraClass.push(className);
+    }
+
+    public removeClass(className:string) {
+        this.extraClass = this.extraClass.filter(x=>x!==className);
     }
 
     /** Check if a tile has been seen */
