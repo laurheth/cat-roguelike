@@ -13,6 +13,15 @@ body {
     background-color: black;
     color: white;
     font-size: 2rem;
+    font-family: 'Work Sans', sans-serif;
+}
+
+h2 {
+    font-size: 3.5rem;
+}
+
+h3 {
+    font-size: 2.5rem;
 }
 
 /* Stripping styles */
@@ -34,33 +43,45 @@ ul {
 /* Overall structure */
 main {
     display: flex;
+    flex-wrap: wrap;
     height: 100vh;
-    border: 2px solid red;
+    border-width: 0 4px;
+    border-style: solid;
+    border-color: rgb(40,40,40);
 }
 
-.column {
+.row {
     display: flex;
-    flex-direction: column;
-    height: 100vh;
-    flex-grow:1;
+    width: 100%;
 }
 
 /* Status bar */
 .statusBar {
-    border: 2px solid red;
     min-width: 12em;
-    height: 100vh;
+    height: 70vh;
+    max-height: 800px;
     padding: 10px;
+    background: rgb(20,20,20);
+    border-right: 4px solid rgb(40,40,40);
 }
 
 .statusBar h2, .statusBar h3, .statusBar li, .statusBar p {
     margin: 10px 0;
 }
 
+.panic {
+    color: red;
+    font-weight: bold;
+}
+
+.party {
+    color: cyan;
+    font-weight: bold;
+}
+
 /* The display */
 .display {
     flex-grow: 1;
-    border: 2px solid red;
 }
 
 /* Make images match the size of the surrounding text */
@@ -76,13 +97,21 @@ main {
 .messages {
     height: 30vh;
     min-height: calc(100vh - 800px);
-    border: 2px solid red;
+    background: rgb(20,20,20);
     padding: 0 10px;
     overflow: hidden;
+    border-top: 4px solid rgb(40,40,40);
+    width: 100%;
+    line-height: 1.4;
 }
 
 .messages li {
     margin: 10px 0;
+    opacity: 0.6;
+}
+
+.messages li:first-child {
+    opacity: 1;
 }
 
 /* Tiles */

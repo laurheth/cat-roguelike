@@ -105,9 +105,9 @@ export default class Tile {
 
     /** Tile memory */
     public remember([x,y]:[number,number], toRemember:any[][],distance:number):RememberTile[] {
-        if (this.seen && !this.remembered) {
+        if (!this.remembered) {
             this.remembered = distance+1;
-            if(toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
+            if(this.seen && toRemember[y] && toRemember[y][x] && toRemember[y][x] === -1) {
                 toRemember[y][x]=this.getTile(false);
             }
             const returnList:RememberTile[] = [];

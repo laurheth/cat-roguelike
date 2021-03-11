@@ -4,32 +4,26 @@ import { Appearance } from './commonInterfaces';
 export interface CritterParams {
     startTile:Tile;
     appearance:Appearance;
-    onDamage?:(attacker:Critter)=>void;
-    onDie?:()=>void;
 }
 
 /** Anything that moves around and does stuff */
 export default class Critter {
     protected currentTile:Tile;
     protected _appearance:Appearance;
-    protected onDamage?:(attacker:Critter)=>void;
-    protected onDie?:()=>void;
     private lookLeft:boolean;
+    protected alive:boolean;
     constructor(params:CritterParams) {
         const {
             startTile,
             appearance,
-            onDamage=(attacker:Critter)=>{},
-            onDie=()=>{},
             ...rest
         } = params;
 
         this.currentTile = startTile;
         this.currentTile.enterTile(this);
         this._appearance = appearance;
-        this.onDamage = onDamage;
-        this.onDie = onDie;
         this.lookLeft=false;
+        this.alive=true;
     }
 
     get appearance():Appearance {
@@ -47,15 +41,15 @@ export default class Critter {
         }
     }
 
-    public step(dx:number, dy:number):boolean {
+    public step(dx:number, dy:number):boolean|Critter {
         const step:number[] = [dx,dy];
-        let moveSuccess = false;
+        let moveSuccess:boolean|Critter = false;
         const moveTo = this.currentTile.getNeighbour(step);
         if (moveTo) {
             const result = moveTo.enterTile(this);
             if (result instanceof Critter) {
                 // interaction of some sort
-                moveSuccess = true;
+                moveSuccess = result;
             } else if (result) {
                 // Success, new tile contains us. Leave old tile
                 this.currentTile.exitTile();
@@ -74,6 +68,13 @@ export default class Critter {
         return moveSuccess;
     }
 
-    /** Stub. */
+    /** Stubs. */
     public act() {}
+    attackMe(damage:number) {
+        return 0;
+    }
+    public die() {
+        this.currentTile.exitTile();
+        this.alive=false;
+    }
 }

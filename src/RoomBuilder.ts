@@ -192,13 +192,11 @@ const hallBuilder = (room1:Tile[],room2:Tile[],rng:Random,
         }
     }
     // Finally, connect the other end
-    console.log(direction,currentTile,tile2);
     if (currentTile) {
         currentTile.addNeighbour(direction,tile2);
         tile2.addNeighbour(direction.map(x=>-x),currentTile);
         carve(currentTile);
         carve(tile2);
-        console.log(tile2);
         return allAddedTiles;
     }
     return false;
