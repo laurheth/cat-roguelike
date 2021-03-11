@@ -21,6 +21,7 @@ export default class Foe extends Critter {
     private hp:number;
     private xp:number;
     private dmg:[number,number];
+    private foodValue:number;
     constructor(params:FoeParams) {
         const { type, startTile, rng, event, ...rest } = params;
         const critterParams:CritterParams = {
@@ -33,6 +34,7 @@ export default class Foe extends Critter {
         let enthusiasm = 5;
         let hp=5;
         let xp=1;
+        let foodValue=5;
         let dmg:[number,number]=[1,3];
         switch(type) {
             case 'mouse':
@@ -49,6 +51,7 @@ export default class Foe extends Critter {
                     classList:['bug']
                 };
                 hp = 4;
+                foodValue = 2;
                 break;
         }
         critterParams.appearance.classList.push('critter');
@@ -61,6 +64,7 @@ export default class Foe extends Critter {
         this.enthusiasm = enthusiasm;
         this.hp=hp;
         this.xp=xp;
+        this.foodValue = foodValue;
         this.dmg = dmg;
     }
 
@@ -120,7 +124,8 @@ export default class Foe extends Critter {
             appearance:this._appearance,
             tile:this.currentTile,
             type:"food",
-            name:`Dead ${this.type}`,
+            name:`dead ${this.type}`,
+            value:this.foodValue,
         });
         corpse.appearance.classList.push('dead');
         this.currentTile.addClass("blood");

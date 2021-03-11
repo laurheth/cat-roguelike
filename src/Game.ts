@@ -33,6 +33,7 @@ export default class Game {
     sharpnessElement:HTMLElement;
     // Inventory element
     itemElement:HTMLElement;
+    actionsElement:HTMLElement;
     // Messages element
     messagesElement:HTMLElement;
     messages:string[]=[];
@@ -44,15 +45,17 @@ export default class Game {
         const hungerElement:HTMLElement|null = document.getElementById("hunger");
         const sharpnessElement:HTMLElement|null = document.getElementById("sharpness");
         const itemElement:HTMLElement|null = document.getElementById("item");
+        const actionsElement:HTMLElement|null = document.getElementById("specialActions");
         const messagesElement:HTMLElement|null = document.getElementById("messages");
         
-        if (displayDiv && fearElement && hungerElement && sharpnessElement && messagesElement && itemElement) {
+        if (displayDiv && fearElement && hungerElement && sharpnessElement && messagesElement && itemElement && actionsElement) {
             this.displayDiv = displayDiv;
             this.fearElement = fearElement;
             this.hungerElement = hungerElement;
             this.sharpnessElement = sharpnessElement;
             this.messagesElement = messagesElement;
             this.itemElement = itemElement;
+            this.actionsElement = actionsElement;
         } else {
             throw new Error("Unable to get all elements on the page.");
         }
@@ -172,6 +175,30 @@ export default class Game {
         this.sharpnessElement.className = (sharpness.class) ? sharpness.class : "";
 
         this.itemElement.innerText = item;
+    }
+
+    /** Update the special actions list */
+    specialActions = (actions:{name:string,callback:()=>void}[]) => {
+        while(this.actionsElement.lastChild) {
+            this.actionsElement.removeChild(this.actionsElement.lastChild);
+        }
+        if(actions.length < 1) {
+            const li = document.createElement('li');
+            li.innerText = "None available."
+            this.actionsElement.appendChild(li);
+        } else {
+            actions.forEach(action=>{
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.innerText = action.name;
+                button.addEventListener("click",(e)=>{
+                    e.preventDefault();
+                    action.callback();
+                });
+                li.appendChild(button);
+                this.actionsElement.appendChild(li);
+            });
+        }
     }
 
     /** Clear messages */

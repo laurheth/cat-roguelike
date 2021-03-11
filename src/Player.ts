@@ -3,6 +3,7 @@ import { default as Critter, CritterParams } from './Critter';
 import FOV from './FOV';
 import Game, { StatusNumber } from './Game';
 import { Random } from 'roguelike-pumpkin-patch';
+import Item from './Item';
 
 interface PlayerParams  {
     fov:FOV;
@@ -26,6 +27,7 @@ export default class Player extends Critter {
     private game:Game;
     private xp:number;
     private turnCount:number;
+    private item:Item|null;
     constructor(params:PlayerParams) {
         const { fov, startTile, statusUpdate, rng, game, ...rest } = params;
         super({
@@ -36,6 +38,7 @@ export default class Player extends Critter {
             }
         });
 
+        this.item=null;
         this.fov = fov;
         this.statusUpdate = statusUpdate;
         this.rng = rng;
@@ -60,6 +63,7 @@ export default class Player extends Critter {
         this.maxSharpness = 10;
         this.xp = 0;
         this.turnCount = 0;
+        this.item=null;
     }
 
     /** Gain XP */
@@ -91,6 +95,7 @@ export default class Player extends Critter {
         this.updateStatus();
         this.turnCount++;
         this.honger();
+        // Prepare for player input
         return new Promise(resolve => {
             const eventHandler = (event:KeyboardEvent)=>{
                 const eventResult = this.handleEvent(event);
@@ -104,6 +109,53 @@ export default class Player extends Critter {
                 }
             }
             document.addEventListener('keydown',eventHandler);
+            // Update available special actions
+            const actions:{name:string,callback:()=>void}[] = [];
+            // Is there an item to pick up?
+            if(this.currentTile.item) {
+                actions.push({
+                    name:"Pick up "+this.currentTile.item.name,
+                    callback:()=>{
+                        const currentItem = this.item;
+                        this.item = this.currentTile.item;
+                        if(currentItem) {
+                            this.currentTile.item = currentItem;
+                        } else {
+                            this.currentTile.item = null;
+                        }
+                        document.removeEventListener('keydown',eventHandler);
+                        resolve(true);
+                    }
+                })
+            }
+            const item=this.item;
+            if(item) {
+                // Is the held item usable?
+                if(item.usable) {
+                    actions.push({
+                        name:item.useVerb+" "+item.name,
+                        callback:()=>{
+                            this.item = item.use(this);
+                            document.removeEventListener('keydown',eventHandler);
+                            resolve(true);
+                        }
+                    });
+                }
+                // Drop the item?
+                actions.push({
+                    name:"Drop "+item.name,
+                    callback:()=>{
+                        const tile = this.currentTile.findEmptyNeigbour(x=>!x.item);
+                        if (tile) {
+                            tile.item = this.item;
+                            this.item = null;
+                            document.removeEventListener('keydown',eventHandler);
+                            resolve(true);
+                        }
+                    }
+                });
+            }
+            this.game.specialActions(actions);
         });
     }
 
@@ -124,14 +176,14 @@ export default class Player extends Critter {
             max:this.maxFear,
             class:(this.fear / this.maxFear > 0.8) ? "panic" : ""
         },{
-            min:this.hunger,
+            min:Math.max(0,this.hunger),
             max:this.maxHunger,
             class:(this.hunger / this.maxHunger > 0.8) ? "panic" : ""
         },{
             min:this.sharpness,
             max:this.maxSharpness,
             class:(this.sharpness / this.maxSharpness > 0.8) ? "party" : ""
-        },undefined);
+        },this.item?.name);
     }
 
     /** Calculate damage */
@@ -160,6 +212,13 @@ export default class Player extends Critter {
             this.die();
         }
         return 0;
+    }
+
+    feed(feed:number) {
+        this.hunger = this.hunger - feed;
+        if (this.hunger < 0) {
+            this.hunger = -1;
+        }
     }
 
     public die() {
