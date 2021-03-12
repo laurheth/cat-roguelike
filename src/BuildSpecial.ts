@@ -19,7 +19,7 @@ const BuildSpecial:CritterBuilder = (type:string, tile:Tile, rng:Random)=>{
                 },
                 onInteract:(player:Player,game:Game)=>{
                     game.buildMessage("You sharpen your claws on the scratching post!");
-                    player.sharpenClaws(rng.getNumber(2,5));
+                    player.sharpenClaws(rng.getNumber(1,3));
                     critter.die();
                 }
             });

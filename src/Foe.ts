@@ -38,7 +38,7 @@ export default class Foe extends Critter {
         let enthusiasm = 5;
         let hp=5;
         let xp=1;
-        let foodValue=5;
+        let foodValue=4;
         let dmg:[number,number]=[1,3];
         let attackVerb = "attacks";
         switch(type) {

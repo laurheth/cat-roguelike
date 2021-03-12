@@ -81,8 +81,6 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
-    BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
-    BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
 
     // Set somewhere to be the stairs down
     const exitTile = rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)) as Tile;
