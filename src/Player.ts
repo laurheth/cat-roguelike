@@ -58,6 +58,7 @@ export default class Player extends Critter {
 
     /** Reset stats */
     resetStats() {
+        this.alive=true;
         this.fear = 0;
         this.hunger = 0;
         this.sharpness = 5;
@@ -98,86 +99,103 @@ export default class Player extends Critter {
         this.updateStatus();
         this.turnCount++;
         this.honger();
-        // Send whatever messages have been built over the last turn
-        this.game.sendMessage();
         // Prepare for player input
-        return new Promise(resolve => {
-            const eventHandler = (event:KeyboardEvent)=>{
-                const eventResult = this.handleEvent(event);
-                if(eventResult) {
-                    document.removeEventListener('keydown',eventHandler);
-                    if (eventResult instanceof Foe) {
-                        this.game.buildMessage(`You claw the ${eventResult.type}!`);
-                        this.gainXP(eventResult.attackMe(this.calcDmg()));
-                        this.dullClaws();
-                    }
-                    resolve(true);
-                }
-            }
-            document.addEventListener('keydown',eventHandler);
-            // Update available special actions
-            while(this.actions.length > 0) {
-                this.actions.pop();
-            }
-            // Is there an item to pick up?
-            if(this.currentTile.item) {
-                this.actions.push({
-                    name:"Pick up "+this.currentTile.item.name,
-                    callback:()=>{
-                        const currentItem = this.item;
-                        this.item = this.currentTile.item;
-                        if (this.item) {
-                            if(currentItem) {
-                                this.currentTile.item = currentItem;
-                            } else {
-                                this.currentTile.item = null;
-                            }
-                            this.game.buildMessage("You pick up the "+this.item.name+".");
-                            document.removeEventListener('keydown',eventHandler);
-                            resolve(true);
+        if (this.alive) {
+            return new Promise(resolve => {
+                const eventHandler = (event:KeyboardEvent)=>{
+                    const eventResult = this.handleEvent(event);
+                    if(eventResult) {
+                        document.removeEventListener('keydown',eventHandler);
+                        if (eventResult instanceof Foe) {
+                            this.game.buildMessage(`You claw the ${eventResult.type}!`);
+                            this.gainXP(eventResult.attackMe(this.calcDmg()));
+                            this.dullClaws();
                         }
-                    },
-                    button:["g","p","Enter"]
-                })
-            }
-            const item=this.item;
-            if(item) {
-                // Is the held item usable?
-                if(item.usable) {
+                        resolve(true);
+                    }
+                }
+                document.addEventListener('keydown',eventHandler);
+                // Update available special actions
+                while(this.actions.length > 0) {
+                    this.actions.pop();
+                }
+                // Are we on a staircase?
+                if(this.currentTile.isStair()) {
+                    this.game.buildMessage("You found the stairs down!","good");
                     this.actions.push({
-                        name:item.useVerb+" "+item.name,
+                        name:"Go down the stairs",
                         callback:()=>{
-                            this.game.buildMessage(`You ${item.useVerb.toLowerCase()} the ${item.name}.`);
-                            this.item = item.use(this);
-                            document.removeEventListener('keydown',eventHandler);
-                            resolve(true);
+                            this.game.buildMessage(`You go down the stairs to level ${this.game.level+1}...`)
+                            this.game.newLevel(this.game.level+1,this.game.map,this);
                         },
-                        button:["u","e","Enter"]
+                        button:['>','<','Enter']
+                    })
+                }
+                // Is there an item to pick up?
+                if(this.currentTile.item) {
+                    this.game.buildMessage(`You see here a ${this.currentTile.item.name}.`);
+                    this.actions.push({
+                        name:"Pick up "+this.currentTile.item.name,
+                        callback:()=>{
+                            const currentItem = this.item;
+                            this.item = this.currentTile.item;
+                            if (this.item) {
+                                if(currentItem) {
+                                    this.currentTile.item = currentItem;
+                                } else {
+                                    this.currentTile.item = null;
+                                }
+                                this.game.buildMessage("You pick up the "+this.item.name+".");
+                                document.removeEventListener('keydown',eventHandler);
+                                resolve(true);
+                            }
+                        },
+                        button:["g","p","Enter"]
+                    })
+                }
+                const item=this.item;
+                if(item) {
+                    // Is the held item usable?
+                    if(item.usable) {
+                        this.actions.push({
+                            name:item.useVerb+" "+item.name,
+                            callback:()=>{
+                                this.game.buildMessage(`You ${item.useVerb.toLowerCase()} the ${item.name}.`);
+                                this.item = item.use(this);
+                                document.removeEventListener('keydown',eventHandler);
+                                resolve(true);
+                            },
+                            button:["u","e","Enter"]
+                        });
+                    }
+                    // Drop the item?
+                    this.actions.push({
+                        name:"Drop "+item.name,
+                        callback:()=>{
+                            const tile = this.currentTile.findEmptyNeigbour(x=>!x.item);
+                            if (tile) {
+                                tile.item = this.item;
+                                this.item = null;
+                                this.game.buildMessage("You drop the "+item.name+".");
+                                document.removeEventListener('keydown',eventHandler);
+                                resolve(true);
+                            }
+                        },
+                        button:["d","p","Delete"]
                     });
                 }
-                // Drop the item?
-                this.actions.push({
-                    name:"Drop "+item.name,
-                    callback:()=>{
-                        const tile = this.currentTile.findEmptyNeigbour(x=>!x.item);
-                        if (tile) {
-                            tile.item = this.item;
-                            this.item = null;
-                            this.game.buildMessage("You drop the "+item.name+".");
-                            document.removeEventListener('keydown',eventHandler);
-                            resolve(true);
-                        }
-                    },
-                    button:["d","p","Delete"]
-                });
-            }
-            this.game.specialActions(this.actions);
-        });
+                // Send whatever messages have been built over the last turn
+                this.game.sendMessage();
+                this.game.specialActions(this.actions);
+            });
+        } else {
+            return;
+        }
     }
 
     /** Advance honger */
     honger() {
-        if(this.turnCount % 5 === 0) {
+        if(this.turnCount % 50 === 0) {
             this.hunger++;
             if (this.hunger === this.maxHunger-1) {
                 this.game.buildMessage("You are starving!","bad");
@@ -246,6 +264,11 @@ export default class Player extends Critter {
     }
 
     public die() {
+        this.alive=false;
+        while(this.actions.length > 0) {
+            this.actions.pop();
+        }
+        this.game.specialActions(this.actions);
         this.game.resetButton();
         this.game.sendMessage();
         this.fov.look(this.currentTile);

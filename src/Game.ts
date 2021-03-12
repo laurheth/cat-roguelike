@@ -11,6 +11,11 @@ export interface StatusNumber {
     class?:string;
 }
 
+interface Map {
+    startTile:Tile;
+    allTiles:Tile[];
+}
+
 /** Container for the entire game */
 export default class Game {
     // Display related things
@@ -22,7 +27,8 @@ export default class Game {
     // The random number generator
     random:Random;
     // Container for the map
-    map:{startTile:Tile,allTiles:Tile[]};
+    map:Map;
+    level:number;
     // Event manager
     event:EventManager;
     loop:boolean;
@@ -38,6 +44,8 @@ export default class Game {
     messagesElement:HTMLElement;
     messages:HTMLElement[]=[];
     nextMessage:HTMLElement|null=null;
+    // The player
+    player:Player;
     /** Constructor, start the game! */
     constructor() {
         // Grab every elements we're going to need
@@ -80,8 +88,7 @@ export default class Game {
         });
 
         this.random = new Random();
-        this.map = MapGenerator(1,this.random);
-        const tile = this.map.startTile;
+        // const tile = this.map.startTile;
         this.loop=false;
         this.actors = [];
 
@@ -131,33 +138,60 @@ export default class Game {
         );
 
         this.event = new EventManager({type:'simple'});
-
-        this.clearMessages();
-        this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
-        this.sendMessage();
-
+        this.level=1;
+        this.map = this.startGame();
+        const tile = this.map.startTile;
         if(tile) {
-            const player = new Player({
+            this.player = new Player({
                 startTile:tile,
                 fov: fov,
                 statusUpdate:this.updateStatus,
                 rng:this.random,
                 game:this,
             });
-            const foe = new Foe({
-                type:'mouse',
-                startTile: this.random.getRandomElement(this.map.allTiles.filter(x=>x.passable)),
-                rng:this.random,
-                event:this.event,
-                game:this,
-            })
-            this.actors.push(foe);
-            this.event.add(player);
+            this.event.add(this.player);
             this.start();
         } else {
             // Update this to figure out an alternative (i.e. maybe try again?)
             throw new Error("No initial tile found.");
         }
+    }
+
+    /** Start from the beginning */
+    startGame(oldMap?:Map,player?:Player):Map {
+        this.clearEvent();
+        this.clearMessages();
+        this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
+        this.sendMessage();
+        const map = this.newLevel(1,oldMap,player);
+        this.level=1;
+        if(player) {
+            player.resetStats();
+            this.start();
+        }
+        return map;
+    }
+
+    /** Go to a new level */
+    newLevel(level:number,oldMap?:Map,player?:Player):Map {
+        // Build the map
+        this.level=level;
+        const newMap = MapGenerator(level,this.random,this);
+        // Update the old one, if available
+        if(oldMap) {
+            oldMap.startTile = newMap.startTile;
+            oldMap.allTiles = newMap.allTiles;
+        }
+        // Put the player on it
+        if (player) {
+            const startTile = newMap.startTile.findEmptyNeigbour((x=>!x.critter));
+            if (startTile && player.goTo(startTile)) {
+                return newMap;
+            } else {
+                throw new Error("Unable to generate map. Oh no!");
+            }
+        }
+        return newMap;
     }
 
     /** Start the event manager */
@@ -239,11 +273,15 @@ export default class Game {
     /** Generate a reset button and slip it in with the messages */
     resetButton() {
         const button = document.createElement('button');
+        button.addEventListener("click",(e)=>{
+            e.preventDefault();
+            this.startGame(this.map,this.player);
+        });
         button.innerText = "Try again?";
-        if (this.nextMessage) {
-            console.log("wtf");
-            this.nextMessage.appendChild(button);
+        if (!this.nextMessage) {
+            this.nextMessage = document.createElement('li');
         }
+        this.nextMessage.appendChild(button);
     }
 
     /** Send the new message */

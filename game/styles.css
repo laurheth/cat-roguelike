@@ -194,6 +194,11 @@ main {
     transform:scaleY(-1);
 }
 
+.stairs {
+    color: white;
+    font-weight: bold;
+}
+
 .blood {
     background: darkred;
 }

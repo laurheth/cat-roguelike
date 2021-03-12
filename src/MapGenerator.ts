@@ -1,6 +1,8 @@
 import RoomBuilder, { hallBuilder } from './RoomBuilder';
 import { Random } from 'roguelike-pumpkin-patch';
 import Tile from './Tile';
+import Game from './Game';
+import Foe from './Foe';
 
 /** Rectangleroom */
 const rectangleRoom = (range:[number,number], rng:Random,
@@ -29,7 +31,7 @@ const themes:{[key:string]:string[]}[] = [
 ];
 
 /** Function to generate a map */
-const generateMap = (level:number, rng:Random)=>{
+const generateMap = (level:number, rng:Random, game:Game)=>{
     const hallTheme = rng.getRandomElement(themes);
     const roomTheme = rng.getRandomElement(themes);
 
@@ -63,8 +65,26 @@ const generateMap = (level:number, rng:Random)=>{
             allTiles.push(...success);
         }
     }
+
+    // Add a critter?
+    const foe = new Foe({
+        type:'mouse',
+        startTile: rng.getRandomElement(allTiles.filter(x=>x.passable)),
+        rng:rng,
+        event:game.event,
+        game:game,
+    })
+    game.actors.push(foe);
+
+    // Set somewhere to be the stairs down
+    const exitTile = rng.getRandomElement(allTiles.filter(x=>x.passable)) as Tile;
+    exitTile.setTile({
+        content:">",
+        classList:["stairs"],
+    })
+
     return {
-        startTile:rng.getRandomElement(allTiles.filter(tile=>tile.passable)),
+        startTile:rng.getRandomElement(allTiles.filter(tile=>tile.passable)) as Tile,
         allTiles:allTiles
     }
 }

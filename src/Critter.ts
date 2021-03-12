@@ -82,4 +82,11 @@ export default class Critter {
         this.currentTile.exitTile();
         this.alive=false;
     }
+    public goTo(tile:Tile) {
+        if(tile.enterTile(this) === true) {
+            this.currentTile = tile;
+            return true;
+        }
+        return false;
+    }
 }
