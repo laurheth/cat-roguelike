@@ -64,8 +64,19 @@ export default class Game {
         this.displayHeight=15;
         this.display = new Display({target:displayDiv, width: this.displayWidth, height: this.displayHeight});
         this.center = [Math.floor(this.displayWidth/2),Math.floor(this.displayHeight/2)];
-        this.display.tileSize = this.display.calculateTileSize();
-        window.addEventListener("resize",()=>this.display.tileSize = this.display.calculateTileSize());
+        let tileSize = this.display.calculateTileSize();
+        this.display.tileSize = {
+            tileHeight: Math.ceil(tileSize.tileHeight),
+            tileWidth: Math.ceil(tileSize.tileWidth),
+        }
+
+        window.addEventListener("resize",()=>{
+            tileSize = this.display.calculateTileSize();
+            this.display.tileSize = {
+                tileHeight: Math.ceil(tileSize.tileHeight),
+                tileWidth: Math.ceil(tileSize.tileWidth),
+            }
+        });
 
         this.random = new Random();
         this.map = MapGenerator(1,this.random);
