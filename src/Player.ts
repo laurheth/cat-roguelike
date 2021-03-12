@@ -28,6 +28,7 @@ export default class Player extends Critter {
     private xp:number;
     private turnCount:number;
     private item:Item|null;
+    private actions:{name:string,callback:()=>void,button:string[]}[]
     constructor(params:PlayerParams) {
         const { fov, startTile, statusUpdate, rng, game, ...rest } = params;
         super({
@@ -51,6 +52,7 @@ export default class Player extends Critter {
         this.maxSharpness = 10;
         this.xp = 0;
         this.turnCount=0;
+        this.actions=[];
     }
 
     /** Reset stats */
@@ -110,10 +112,12 @@ export default class Player extends Critter {
             }
             document.addEventListener('keydown',eventHandler);
             // Update available special actions
-            const actions:{name:string,callback:()=>void}[] = [];
+            while(this.actions.length > 0) {
+                this.actions.pop();
+            }
             // Is there an item to pick up?
             if(this.currentTile.item) {
-                actions.push({
+                this.actions.push({
                     name:"Pick up "+this.currentTile.item.name,
                     callback:()=>{
                         const currentItem = this.item;
@@ -125,24 +129,26 @@ export default class Player extends Critter {
                         }
                         document.removeEventListener('keydown',eventHandler);
                         resolve(true);
-                    }
+                    },
+                    button:["g","p","Enter"]
                 })
             }
             const item=this.item;
             if(item) {
                 // Is the held item usable?
                 if(item.usable) {
-                    actions.push({
+                    this.actions.push({
                         name:item.useVerb+" "+item.name,
                         callback:()=>{
                             this.item = item.use(this);
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);
-                        }
+                        },
+                        button:["u","e","Enter"]
                     });
                 }
                 // Drop the item?
-                actions.push({
+                this.actions.push({
                     name:"Drop "+item.name,
                     callback:()=>{
                         const tile = this.currentTile.findEmptyNeigbour(x=>!x.item);
@@ -152,10 +158,11 @@ export default class Player extends Critter {
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);
                         }
-                    }
+                    },
+                    button:["d","p","Delete"]
                 });
             }
-            this.game.specialActions(actions);
+            this.game.specialActions(this.actions);
         });
     }
 
@@ -232,24 +239,38 @@ export default class Player extends Critter {
         let acted:boolean|Critter = false;
         switch(event.key) {
             case 'Right':
+            case '6':
             case 'ArrowRight':
                 acted = this.step(1,0);
                 break;
             case 'Left':
             case 'ArrowLeft':
+            case '4':
                 acted = this.step(-1,0);
                 break;
             case 'Up':
             case 'ArrowUp':
+            case '8':
                 acted = this.step(0,-1);
                 break;
             case 'Down':
             case 'ArrowDown':
+            case '2':
                 acted = this.step(0,1);
                 break;
             case 'Period':
             case '.':
+            case '5':
                 acted=true;
+                break;
+            default:
+                if(this.actions.length>0) {
+                    const action = this.actions.find(x=>x.button.includes(event.key));
+                    if (action) {
+                        action.callback();
+                        acted=true;
+                    }
+                }
                 break;
         }
         return acted;

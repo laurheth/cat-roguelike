@@ -121,7 +121,7 @@ export default class Game {
         this.event = new EventManager({type:'simple'});
 
         this.clearMessages();
-        this.sendMessage("Welcome to the Furball Catacombs! You are a cat, and your owner doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your owner's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!");
+        this.sendMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!");
 
         if(tile) {
             const player = new Player({
