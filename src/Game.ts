@@ -36,7 +36,8 @@ export default class Game {
     actionsElement:HTMLElement;
     // Messages element
     messagesElement:HTMLElement;
-    messages:string[]=[];
+    messages:HTMLElement[]=[];
+    nextMessage:HTMLElement|null=null;
     /** Constructor, start the game! */
     constructor() {
         // Grab every elements we're going to need
@@ -132,7 +133,8 @@ export default class Game {
         this.event = new EventManager({type:'simple'});
 
         this.clearMessages();
-        this.sendMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!");
+        this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
+        this.sendMessage();
 
         if(tile) {
             const player = new Player({
@@ -147,6 +149,7 @@ export default class Game {
                 startTile: this.random.getRandomElement(this.map.allTiles.filter(x=>x.passable)),
                 rng:this.random,
                 event:this.event,
+                game:this,
             })
             this.actors.push(foe);
             this.event.add(player);
@@ -222,17 +225,38 @@ export default class Game {
         }
     }
 
-    /** Send a message */
-    sendMessage(message:string,className="") {
-        this.messages.unshift(message);
-        const newMessageElement = document.createElement("li");
-        newMessageElement.innerHTML = message;
-        newMessageElement.className = className;
-        this.messagesElement.prepend(newMessageElement);
-        if(this.messages.length > 10) {
-            this.messages.pop();
-            if(this.messagesElement.lastChild) {
-                this.messagesElement.removeChild(this.messagesElement.lastChild);
+    /** Build the next message that will be sent. */
+    buildMessage(message:string, className:string="") {
+        if (!this.nextMessage) {
+            this.nextMessage = document.createElement('li');
+        }
+        const thisPart = document.createElement('span');
+        thisPart.innerHTML = message+" ";
+        thisPart.className = className;
+        this.nextMessage.appendChild(thisPart);
+    }
+
+    /** Generate a reset button and slip it in with the messages */
+    resetButton() {
+        const button = document.createElement('button');
+        button.innerText = "Try again?";
+        if (this.nextMessage) {
+            console.log("wtf");
+            this.nextMessage.appendChild(button);
+        }
+    }
+
+    /** Send the new message */
+    sendMessage() {
+        if(this.nextMessage) {
+            this.messages.unshift(this.nextMessage);
+            this.messagesElement.prepend(this.nextMessage);
+            this.nextMessage = null;
+            if(this.messages.length > 10) {
+                this.messages.pop();
+                if(this.messagesElement.lastChild) {
+                    this.messagesElement.removeChild(this.messagesElement.lastChild);
+                }
             }
         }
     }

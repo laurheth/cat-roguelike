@@ -1,5 +1,6 @@
 import Tile from './Tile';
 import { default as Critter, CritterParams } from './Critter';
+import Foe from './Foe';
 import FOV from './FOV';
 import Game, { StatusNumber } from './Game';
 import { Random } from 'roguelike-pumpkin-patch';
@@ -97,13 +98,16 @@ export default class Player extends Critter {
         this.updateStatus();
         this.turnCount++;
         this.honger();
+        // Send whatever messages have been built over the last turn
+        this.game.sendMessage();
         // Prepare for player input
         return new Promise(resolve => {
             const eventHandler = (event:KeyboardEvent)=>{
                 const eventResult = this.handleEvent(event);
                 if(eventResult) {
                     document.removeEventListener('keydown',eventHandler);
-                    if (eventResult instanceof Critter) {
+                    if (eventResult instanceof Foe) {
+                        this.game.buildMessage(`You claw the ${eventResult.type}!`);
                         this.gainXP(eventResult.attackMe(this.calcDmg()));
                         this.dullClaws();
                     }
@@ -122,13 +126,16 @@ export default class Player extends Critter {
                     callback:()=>{
                         const currentItem = this.item;
                         this.item = this.currentTile.item;
-                        if(currentItem) {
-                            this.currentTile.item = currentItem;
-                        } else {
-                            this.currentTile.item = null;
+                        if (this.item) {
+                            if(currentItem) {
+                                this.currentTile.item = currentItem;
+                            } else {
+                                this.currentTile.item = null;
+                            }
+                            this.game.buildMessage("You pick up the "+this.item.name+".");
+                            document.removeEventListener('keydown',eventHandler);
+                            resolve(true);
                         }
-                        document.removeEventListener('keydown',eventHandler);
-                        resolve(true);
                     },
                     button:["g","p","Enter"]
                 })
@@ -140,6 +147,7 @@ export default class Player extends Critter {
                     this.actions.push({
                         name:item.useVerb+" "+item.name,
                         callback:()=>{
+                            this.game.buildMessage(`You ${item.useVerb.toLowerCase()} the ${item.name}.`);
                             this.item = item.use(this);
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);
@@ -155,6 +163,7 @@ export default class Player extends Critter {
                         if (tile) {
                             tile.item = this.item;
                             this.item = null;
+                            this.game.buildMessage("You drop the "+item.name+".");
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);
                         }
@@ -168,10 +177,14 @@ export default class Player extends Critter {
 
     /** Advance honger */
     honger() {
-        if(this.turnCount % 50 === 0) {
+        if(this.turnCount % 5 === 0) {
             this.hunger++;
+            if (this.hunger === this.maxHunger-1) {
+                this.game.buildMessage("You are starving!","bad");
+            }
         }
         if (this.hunger >= this.maxHunger) {
+            this.game.buildMessage("You are too hungry! You flee to find your food bowl back home.","bad");
             this.die();
         }
     }
@@ -216,19 +229,25 @@ export default class Player extends Critter {
     attackMe(damage:number) {
         this.fear += damage;
         if (this.fear >= this.maxFear) {
+            this.game.buildMessage("You panic, and run for your life!","bad");
             this.die();
+        } else if (this.maxFear - this.fear < damage*1.5) {
+            this.game.buildMessage("You are getting very scared!","bad");
         }
         return 0;
     }
 
     feed(feed:number) {
         this.hunger = this.hunger - feed;
+        this.game.buildMessage("Delicious!","good");
         if (this.hunger < 0) {
             this.hunger = -1;
         }
     }
 
     public die() {
+        this.game.resetButton();
+        this.game.sendMessage();
         this.fov.look(this.currentTile);
         this.updateStatus();
         this.game.stop();

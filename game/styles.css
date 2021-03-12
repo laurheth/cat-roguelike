@@ -78,6 +78,7 @@ main {
     border: 2px solid rgb(200,200,200);
     border-radius: 2rem;
     padding: 4px 8px;
+    transition: 0.3s;
 }
 
 .statusBar button:hover, .statusBar button:focus {
@@ -137,6 +138,32 @@ main {
     opacity: 1;
 }
 
+.messages .bad {
+    color: red;
+}
+
+.messages .good {
+    color: yellow;
+}
+
+.messages button {
+    display: inline;
+    font-family: 'Work Sans', sans-serif;
+    background: inherit;
+    border: none;
+    color: white;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+    transform: scale(1);
+}
+
+.messages button:hover, .messages button:focus {
+    color: yellow;
+    transform: scale(1.1);
+}
+
 /* Tiles */
 .wall {
     background: brown;
@@ -183,5 +210,17 @@ main {
 
     .messages {
         grid-column: 2/3;
+    }
+}
+
+@media(max-width:666px) {
+    h2 {
+        font-size: 2.2rem;
+    }
+    h3 {
+        font-size: 2rem;
+    }
+    body {
+        font-size:1.6rem;
     }
 }

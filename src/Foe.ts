@@ -3,17 +3,19 @@ import {default as Critter, CritterParams } from './Critter';
 import { EventManager, Random } from 'roguelike-pumpkin-patch';
 import Player from './Player';
 import Item from './Item';
+import Game from './Game';
 
 interface FoeParams {
     type:string;
     startTile:Tile;
     rng:Random;
     event:EventManager;
+    game:Game;
 }
 
 /** Foe */
 export default class Foe extends Critter {
-    private type:string;
+    readonly type:string;
     private rng:Random;
     private awake:number;
     private enthusiasm:number;
@@ -22,8 +24,10 @@ export default class Foe extends Critter {
     private xp:number;
     private dmg:[number,number];
     private foodValue:number;
+    private game:Game;
+    private attackVerb:string;
     constructor(params:FoeParams) {
-        const { type, startTile, rng, event, ...rest } = params;
+        const { type, startTile, rng, event, game, ...rest } = params;
         const critterParams:CritterParams = {
             startTile:startTile,
             appearance:{
@@ -36,6 +40,7 @@ export default class Foe extends Critter {
         let xp=1;
         let foodValue=5;
         let dmg:[number,number]=[1,3];
+        let attackVerb = "attacks";
         switch(type) {
             case 'mouse':
                 critterParams.appearance = {
@@ -43,6 +48,7 @@ export default class Foe extends Critter {
                     classList:['mouse']
                 };
                 hp = 6;
+                attackVerb = "bites";
                 break;
             default:
             case 'bug':
@@ -52,6 +58,7 @@ export default class Foe extends Critter {
                 };
                 hp = 4;
                 foodValue = 2;
+                attackVerb = "bites"
                 break;
         }
         critterParams.appearance.classList.push('critter');
@@ -66,9 +73,14 @@ export default class Foe extends Critter {
         this.xp=xp;
         this.foodValue = foodValue;
         this.dmg = dmg;
+        this.game=game;
+        this.attackVerb = attackVerb;
     }
 
     get appearance() {
+        if (this.awake < 0 && this.alive) {
+            this.game.buildMessage(`The ${this.type} shouts!`);
+        }
         this.awake = this.enthusiasm;
         return this.getAppearance();
     }
@@ -102,6 +114,7 @@ export default class Foe extends Critter {
                 if (min) {
                     const stepResult = this.step(min.step[0],min.step[1]);
                     if (stepResult instanceof Player) {
+                        this.game.buildMessage(`The ${this.type} ${this.attackVerb} you!`);
                         stepResult.attackMe(this.rng.getNumber(...this.dmg));
                     }
                 }
@@ -120,6 +133,7 @@ export default class Foe extends Critter {
     }
 
     public die() {
+        this.game.buildMessage(`The ${this.type} dies!`,"good");
         const corpse = new Item({
             appearance:this._appearance,
             tile:this.currentTile,
