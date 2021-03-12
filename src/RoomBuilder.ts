@@ -164,9 +164,9 @@ const hallBuilder = (room1:Tile[],room2:Tile[],rng:Random,
     }
     let steps=rng.getNumber(...range);
     const direction = [...startDirection];
-    let limiter=100;
-
-    while(limiter > 0 && (!direction.every((x,i)=>x===endDirection[i]) || recentlyTurned)) {
+    let limiter=50;
+    let randomNumber = 0;
+    while((!direction.every((x,i)=>x===endDirection[i]) || recentlyTurned)) {
         limiter--;
         carve(currentTile);
         if (recentlyTurned) {
@@ -175,7 +175,10 @@ const hallBuilder = (room1:Tile[],room2:Tile[],rng:Random,
         } else {
             steps--;
             if (steps<=0) {
-                if (rng.getRandom()>0.5) {
+                if (limiter > 0) {
+                    randomNumber = rng.getRandom();
+                }
+                if (randomNumber>0.5) {
                     [direction[0],direction[1]] = [Math.round(direction[1]),Math.round(-direction[0])];
                 } else {
                     [direction[0],direction[1]] = [Math.round(-direction[1]),Math.round(direction[0])];

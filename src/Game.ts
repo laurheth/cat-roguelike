@@ -163,8 +163,8 @@ export default class Game {
         this.clearMessages();
         this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
         this.sendMessage();
-        const map = this.newLevel(1,oldMap,player);
         this.level=1;
+        const map = this.newLevel(this.level,oldMap,player);
         if(player) {
             player.resetStats();
             this.start();
@@ -270,14 +270,23 @@ export default class Game {
         this.nextMessage.appendChild(thisPart);
     }
 
+    /** Wow! You won! */
+    win() {
+        this.buildMessage("You have the Mouse of Yendor! Your human will be so pleased to find this in their shoes later on. You can rest easy knowing that they will be fed. Congratulations!","good");
+    }
+
     /** Generate a reset button and slip it in with the messages */
-    resetButton() {
+    resetButton(dueToDeath=true) {
         const button = document.createElement('button');
         button.addEventListener("click",(e)=>{
             e.preventDefault();
             this.startGame(this.map,this.player);
         });
-        button.innerText = "Try again?";
+        if (dueToDeath) {
+            button.innerText = "Try again?";
+        } else {
+            button.innerText = "Play again?";
+        }
         if (!this.nextMessage) {
             this.nextMessage = document.createElement('li');
         }

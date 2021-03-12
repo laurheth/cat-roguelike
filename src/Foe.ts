@@ -2,7 +2,7 @@ import Tile from './Tile';
 import {default as Critter, CritterParams } from './Critter';
 import { EventManager, Random } from 'roguelike-pumpkin-patch';
 import Player from './Player';
-import Item from './Item';
+import { default as Item, itemTypes } from './Item';
 import Game from './Game';
 
 interface FoeParams {
@@ -26,6 +26,7 @@ export default class Foe extends Critter {
     private foodValue:number;
     private game:Game;
     private attackVerb:string;
+    private corpseType:itemTypes;
     constructor(params:FoeParams) {
         const { type, startTile, rng, event, game, ...rest } = params;
         const critterParams:CritterParams = {
@@ -41,7 +42,21 @@ export default class Foe extends Critter {
         let foodValue=4;
         let dmg:[number,number]=[1,3];
         let attackVerb = "attacks";
+        let name=type;
+        let corpseType:itemTypes="food";
         switch(type) {
+            case 'Yendor':
+                critterParams.appearance = {
+                    content:`<img src="./assets/yendorMouse.png" alt="Mouse of Yendor">`,
+                    classList:['mouse']
+                }
+                hp=40;
+                xp=0;
+                foodValue=0;
+                dmg=[2,4];
+                name="Mouse of Yendor";
+                corpseType="victory";
+                break;
             case 'mouse':
                 critterParams.appearance = {
                     content:'<img src="./assets/mouse.png" alt="A mouse.">',
@@ -65,7 +80,7 @@ export default class Foe extends Critter {
         super(critterParams);
         this.event = event;
         this.event.add(this);
-        this.type = type;
+        this.type = name;
         this.rng = rng;
         this.awake=-1;
         this.enthusiasm = enthusiasm;
@@ -75,6 +90,7 @@ export default class Foe extends Critter {
         this.dmg = dmg;
         this.game=game;
         this.attackVerb = attackVerb;
+        this.corpseType = corpseType;
     }
 
     get appearance() {
@@ -137,7 +153,7 @@ export default class Foe extends Critter {
         const corpse = new Item({
             appearance:this._appearance,
             tile:this.currentTile,
-            type:"food",
+            type:this.corpseType,
             name:`dead ${this.type}`,
             value:this.foodValue,
         });

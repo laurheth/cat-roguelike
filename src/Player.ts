@@ -74,6 +74,7 @@ export default class Player extends Critter {
     gainXP(xp:number) {
         let possibleGains = false;
         if (xp > 0) {
+            this.fear = Math.max(0, this.fear - 1);
             for(let i=0;i<xp;i++) {
                 if (this.xp % 10 !== 0) {
                     possibleGains = true;
@@ -81,7 +82,6 @@ export default class Player extends Critter {
                     possibleGains = false;
                 }
                 this.xp++;
-                this.fear = Math.max(0, this.fear - 1);
                 if (this.xp % 10 === 0 && possibleGains) {
                     this.maxFear++;
                     this.maxSharpness++;
@@ -138,25 +138,47 @@ export default class Player extends Critter {
                 }
                 // Is there an item to pick up?
                 if(this.currentTile.item) {
-                    this.game.buildMessage(`You see here a ${this.currentTile.item.name}.`);
-                    this.actions.push({
-                        name:"Pick up "+this.currentTile.item.name,
-                        callback:()=>{
-                            const currentItem = this.item;
-                            this.item = this.currentTile.item;
-                            if (this.item) {
-                                if(currentItem) {
-                                    this.currentTile.item = currentItem;
-                                } else {
-                                    this.currentTile.item = null;
+                    if(this.currentTile.item.type === "victory") {
+                        this.game.buildMessage(`You see here the ${this.currentTile.item.name}!`);
+                        this.actions.push({
+                            name:"Pick up "+this.currentTile.item.name + " and win the game",
+                            callback:()=>{
+                                const currentItem = this.item;
+                                this.item = this.currentTile.item;
+                                if (this.item) {
+                                    if(currentItem) {
+                                        this.currentTile.item = currentItem;
+                                    } else {
+                                        this.currentTile.item = null;
+                                    }
+                                    document.removeEventListener('keydown',eventHandler);
+                                    this.win();
+                                    resolve(true);
                                 }
-                                this.game.buildMessage("You pick up the "+this.item.name+".");
-                                document.removeEventListener('keydown',eventHandler);
-                                resolve(true);
-                            }
-                        },
-                        button:["g","p","Enter"]
-                    })
+                            },
+                            button:["g","p","Enter"]
+                        });
+                    } else {
+                        this.game.buildMessage(`You see here a ${this.currentTile.item.name}.`);
+                        this.actions.push({
+                            name:"Pick up "+this.currentTile.item.name,
+                            callback:()=>{
+                                const currentItem = this.item;
+                                this.item = this.currentTile.item;
+                                if (this.item) {
+                                    if(currentItem) {
+                                        this.currentTile.item = currentItem;
+                                    } else {
+                                        this.currentTile.item = null;
+                                    }
+                                    this.game.buildMessage("You pick up the "+this.item.name+".");
+                                    document.removeEventListener('keydown',eventHandler);
+                                    resolve(true);
+                                }
+                            },
+                            button:["g","p","Enter"]
+                        });
+                    }
                 }
                 const item=this.item;
                 if(item) {
@@ -307,17 +329,26 @@ export default class Player extends Critter {
         }
     }
 
-    public die() {
-        this.alive=false;
+    public stop(dueToDeath=true) {
         while(this.actions.length > 0) {
             this.actions.pop();
         }
         this.game.specialActions(this.actions);
-        this.game.resetButton();
+        this.game.resetButton(dueToDeath);
         this.game.sendMessage();
         this.fov.look(this.currentTile);
         this.updateStatus();
         this.game.stop();
+    }
+
+    public win() {
+        this.game.win();
+        this.stop(false);
+    }
+
+    public die() {
+        this.alive=false;
+        this.stop(true);
     }
 
     /** Event handler */

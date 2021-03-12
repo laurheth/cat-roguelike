@@ -4,10 +4,12 @@ import { Appearance } from "./commonInterfaces";
 
 type UseFunction = (item:Item, user:Player)=>(Item|null);
 
+export type itemTypes = "food"|"key"|"victory";
+
 interface ItemParams {
     appearance:Appearance;
     name:string;
-    type:"food"|"key";
+    type:itemTypes;
     tile:Tile;
     value?:number;
     onUse?:UseFunction;
@@ -21,10 +23,11 @@ export default class Item {
     readonly name:string;
     readonly useVerb:string;
     private onUse:UseFunction;
+    readonly type:itemTypes;
     constructor(params:ItemParams) {
         const { appearance, name, type, tile, value=0, ...rest } = params;
         let onUse = rest.onUse;
-
+        this.type=type;
         this._appearance = appearance;
         const possibleTile = tile.findEmptyNeigbour((tile:Tile)=>!tile.item);
         if (possibleTile) {
