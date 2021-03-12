@@ -86,6 +86,7 @@ export default class Player extends Critter {
                     this.maxFear++;
                     this.maxSharpness++;
                     this.sharpness++;
+                    this.game.buildMessage("You have become stronger!","good");
                 }
             }
         }
@@ -110,6 +111,8 @@ export default class Player extends Critter {
                             this.game.buildMessage(`You claw the ${eventResult.type}!`);
                             this.gainXP(eventResult.attackMe(this.calcDmg()));
                             this.dullClaws();
+                        } else if (eventResult instanceof Critter) {
+                            eventResult.interact(this,this.game);
                         }
                         resolve(true);
                     }
@@ -120,13 +123,15 @@ export default class Player extends Critter {
                     this.actions.pop();
                 }
                 // Are we on a staircase?
-                if(this.currentTile.isStair()) {
+                if(this.currentTile.isStair) {
                     this.game.buildMessage("You found the stairs down!","good");
                     this.actions.push({
                         name:"Go down the stairs",
                         callback:()=>{
                             this.game.buildMessage(`You go down the stairs to level ${this.game.level+1}...`)
                             this.game.newLevel(this.game.level+1,this.game.map,this);
+                            document.removeEventListener('keydown',eventHandler);
+                            resolve(true);
                         },
                         button:['>','<','Enter']
                     })
@@ -184,6 +189,38 @@ export default class Player extends Critter {
                         button:["d","p","Delete"]
                     });
                 }
+                // Need to lick yourself to relax?
+                if(this.fear > 0) {
+                    this.actions.push({
+                        name:"Lick yourself",
+                        callback:()=>{
+                            const messages = ["You lick yourself and feel much better.", "You groom yourself! It's relaxing.", "Mlem mlem mlem...","Lick... lick... Ahh, so clean!"];
+                            this.game.buildMessage(this.rng.getRandomElement(messages),"good");
+                            this.fear--;
+                            if(this.rng.getRandom()>0.9 && this.maxHunger - this.hunger > 2) {
+                                this.game.buildMessage("You barf up a hairball; oh no!","bad");
+                                this.hunger++;
+                                const borfTile = this.currentTile.findEmptyNeigbour((x=>{
+                                    return x.passable && x.critter !== this
+                                }));
+                                if (borfTile) {
+                                    borfTile.setTile({
+                                        content:'~',
+                                        classList:['barf']
+                                    });
+                                } else {
+                                    this.currentTile.setTile({
+                                        content:'~',
+                                        classList:['barf']
+                                    });
+                                }
+                            }
+                            document.removeEventListener('keydown',eventHandler);
+                            resolve(true);
+                        },
+                        button:["l"]
+                    })
+                }
                 // Send whatever messages have been built over the last turn
                 this.game.sendMessage();
                 this.game.specialActions(this.actions);
@@ -229,6 +266,13 @@ export default class Player extends Critter {
         const min = Math.min(1,this.sharpness / 2);
         const max = Math.max(2, 1.5 * this.sharpness);
         return this.rng.getNumber(min,max);
+    }
+
+    sharpenClaws(amount:number) {
+        this.sharpness += amount;
+        if (this.sharpness > this.maxSharpness) {
+            this.game.buildMessage("You are now MEGASHARP!","good");
+        }
     }
 
     dullClaws() {

@@ -1,9 +1,12 @@
 import Tile from './Tile';
+import Player from './Player';
+import Game from './Game';
 import { Appearance } from './commonInterfaces';
 
 export interface CritterParams {
     startTile:Tile;
     appearance:Appearance;
+    onInteract?:(player:Player, game:Game)=>void;
 }
 
 /** Anything that moves around and does stuff */
@@ -12,10 +15,12 @@ export default class Critter {
     protected _appearance:Appearance;
     private lookLeft:boolean;
     protected alive:boolean;
+    private onInteract:((player:Player,game:Game)=>void)|undefined;
     constructor(params:CritterParams) {
         const {
             startTile,
             appearance,
+            onInteract,
             ...rest
         } = params;
 
@@ -29,6 +34,7 @@ export default class Critter {
         this._appearance = appearance;
         this.lookLeft=false;
         this.alive=true;
+        this.onInteract = onInteract;
     }
 
     get appearance():Appearance {
@@ -71,6 +77,12 @@ export default class Critter {
             }
         }
         return moveSuccess;
+    }
+
+    public interact(player:Player, game:Game) {
+        if(this.onInteract) {
+            this.onInteract(player, game);
+        }
     }
 
     /** Stubs. */

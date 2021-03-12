@@ -203,6 +203,11 @@ main {
     background: darkred;
 }
 
+.barf {
+    background: yellow;
+    color: green;
+}
+
 .memory {
     filter:grayscale(90%) brightness(70%);
     font-weight: normal;
