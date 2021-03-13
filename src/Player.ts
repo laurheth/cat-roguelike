@@ -130,6 +130,22 @@ export default class Player extends Critter {
                 while(this.actions.length > 0) {
                     this.actions.pop();
                 }
+                // Are we next to a door to unlock?
+                if(this.item && this.item.isKey) {
+                    const tiles = this.currentTile.getNeighbours();
+                    const door = tiles.find(x=>x.isDoor);
+                    if(door) {
+                        this.actions.push({
+                            name:"Open the door",
+                            callback:()=>{
+                                this.useKey(door);
+                                document.removeEventListener('keydown',eventHandler);
+                                resolve(true);
+                            },
+                            button:['o','u']
+                        })
+                    }
+                }
                 // Are we on a staircase?
                 if(this.currentTile.isStair) {
                     this.game.buildMessage("You found the stairs down!","good");
@@ -231,9 +247,22 @@ export default class Player extends Critter {
                             if(this.rng.getRandom()>0.9 && this.maxHunger - this.hunger > 2) {
                                 this.game.buildMessage("You barf up a hairball; oh no!","bad");
                                 this.hunger++;
-                                const borfTile = this.currentTile.findEmptyNeigbour((x=>{
-                                    return x.passable && x.critter !== this
-                                }));
+                                let borfTile;
+                                const leftTile = this.currentTile.getNeighbour([-1,0]);
+                                const rightTile = this.currentTile.getNeighbour([1,0]);
+                                if(this.lookLeft && leftTile) {
+                                    borfTile = leftTile.findEmptyNeigbour((x=>{
+                                        return x.passable && x.critter !== this
+                                    }));
+                                } else if (!this.lookLeft && rightTile) {
+                                    borfTile = rightTile.findEmptyNeigbour((x=>{
+                                        return x.passable && x.critter !== this
+                                    }));
+                                } else {
+                                    borfTile = this.currentTile.findEmptyNeigbour((x=>{
+                                        return x.passable && x.critter !== this
+                                    }));
+                                }
                                 if (borfTile) {
                                     borfTile.setTile({
                                         content:'~',
@@ -309,12 +338,21 @@ export default class Player extends Critter {
     dullClaws() {
         if (this.sharpness > this.maxSharpness) {
             this.sharpness--;
+        } else if (this.sharpness > this.maxSharpness/2) {
+            if(this.rng.getRandom() > 0.5) {
+                this.sharpness--;
+            }
+        } else if (this.sharpness > this.maxSharpness/3) {
+            if(this.rng.getRandom() > 0.8) {
+                this.sharpness--;
+            }
+        } else if (this.sharpness > this.maxSharpness/4) {
+            if(this.rng.getRandom() > 0.9) {
+                this.sharpness--;
+            }
         } else if (this.sharpness > 1) {
-            for(let i=(this.maxSharpness - this.sharpness); i<this.maxSharpness;i++) {
-                if(this.rng.getRandom() > 0.96) {
-                    this.sharpness--;
-                    break;
-                }
+            if(this.rng.getRandom() > 0.95) {
+                this.sharpness--;
             }
         }
     }
@@ -358,6 +396,14 @@ export default class Player extends Critter {
     public die() {
         this.alive=false;
         this.stop(true);
+    }
+
+    public hasKey() {
+        if (this.item && this.item.isKey) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /** Event handler */
@@ -404,5 +450,11 @@ export default class Player extends Critter {
                 break;
         }
         return acted;
+    }
+
+    public useKey(doorTile:Tile) {
+        doorTile.open();
+        this.game.buildMessage(`You use the key and open the door!`,"good");
+        this.item = null;
     }
 }

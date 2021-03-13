@@ -50,7 +50,7 @@ export default class Foe extends Critter {
                     content:`<img src="./assets/yendorMouse.png" alt="Mouse of Yendor">`,
                     classList:['mouse']
                 }
-                hp=1;
+                hp=40;
                 xp=0;
                 foodValue=0;
                 dmg=[2,4];
@@ -62,7 +62,7 @@ export default class Foe extends Critter {
                     content:'<img src="./assets/mouse.png" alt="A mouse.">',
                     classList:['mouse']
                 };
-                hp = 6;
+                hp = 6 + game.level/2;
                 attackVerb = "bites";
                 break;
             default:
@@ -71,7 +71,7 @@ export default class Foe extends Critter {
                     content:'b',
                     classList:['bug']
                 };
-                hp = 4;
+                hp = 4 + game.level/3;
                 foodValue = 2;
                 attackVerb = "bites"
                 break;

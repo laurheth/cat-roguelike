@@ -4,6 +4,7 @@ import {default as Tile, RememberTile } from './Tile';
 import Player from './Player';
 import MapGenerator from './MapGenerator';
 import Foe from './Foe';
+import TouchHandler from './TouchHandler';
 
 export interface StatusNumber {
     min:number;
@@ -46,6 +47,8 @@ export default class Game {
     nextMessage:HTMLElement|null=null;
     // The player
     player:Player;
+    // Touch handler
+    touch:TouchHandler;
     /** Constructor, start the game! */
     constructor() {
         // Grab every elements we're going to need
@@ -155,6 +158,9 @@ export default class Game {
             // Update this to figure out an alternative (i.e. maybe try again?)
             throw new Error("No initial tile found.");
         }
+
+        // Touch events
+        this.touch = new TouchHandler(this.displayDiv);
     }
 
     /** Start from the beginning */

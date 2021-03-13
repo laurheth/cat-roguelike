@@ -4,6 +4,7 @@ import Tile from './Tile';
 import Game from './Game';
 import Foe from './Foe';
 import BuildSpecial from './BuildSpecial';
+import Item from './Item';
 
 /** Rectangleroom */
 const rectangleRoom = (range:[number,number], rng:Random,
@@ -169,8 +170,19 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     const hallTheme = rng.getRandomElement(themes);
     const roomTheme = rng.getRandomElement(themes);
 
-    const targetRooms = 6+level;
+    let targetRooms = 5;
     const sizeRange:[number,number] = [4,6];
+    if(level === 10) {
+        targetRooms = 14;
+        sizeRange[0]=6;
+        sizeRange[1]=10;
+    } else if (level > 5) {
+        targetRooms = 10;
+        sizeRange[0]=4;
+        sizeRange[1]=8;
+    } else if (level>1) {
+        targetRooms = 7;
+    }
     let rooms=0;
     let endAdded=false;
     let startTile:Tile|undefined=undefined;
@@ -189,12 +201,35 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             success = hallBuilder(allTiles,roomRow,rng,hallTheme);
         }
         if (success) {
+            if(rooms === targetRooms && Array.isArray(success)) {
+                endAdded = addEnd(roomRow,rng,level,game);
+                if (endAdded && success.filter(x=>x.passable).length>0
+                        && (level===10 || rng.getNumber(1,level) > 4)) {
+                    const doorTile = rng.getRandomElement(success.filter(x=>x.passable)) as Tile;
+                    const keyTile = rng.getRandomElement(allTiles.filter(x=>x.passable&&!x.item)) as Tile;
+                    if (doorTile && keyTile) {
+                        // Add a door
+                        doorTile.passable=false;
+                        doorTile.seeThrough=false;
+                        doorTile.setContent(`<img src="./assets/locked.png" alt="Locked door.">`);
+                        doorTile.isDoor = true;
+                        
+                        // Add a key somewhere
+                        const key = new Item({
+                            type:"key",
+                            name:"key",
+                            tile:keyTile,
+                            appearance:{
+                                content:`<img src="./assets/key.png" alt="Key">`,
+                                classList:[]
+                            }
+                        })
+                    }
+                }
+            }
             allTiles.push(...roomRow);
             if (Array.isArray(success) && success.length > 0) {
                 allTiles.push(...success);
-            }
-            if(rooms === targetRooms) {
-                endAdded = addEnd(roomRow,rng,level,game);
             }
         }
         // Add some extra hallways

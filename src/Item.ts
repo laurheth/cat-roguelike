@@ -24,6 +24,7 @@ export default class Item {
     readonly useVerb:string;
     private onUse:UseFunction;
     readonly type:itemTypes;
+    readonly isKey:boolean;
     constructor(params:ItemParams) {
         const { appearance, name, type, tile, value=0, ...rest } = params;
         let onUse = rest.onUse;
@@ -48,6 +49,11 @@ export default class Item {
                     return null;
                 }
             }
+        }
+        if(type === "key") {
+            this.isKey=true;
+        } else {
+            this.isKey=false;
         }
         if (!onUse) {
             onUse = (item:Item, user:Player) => null;

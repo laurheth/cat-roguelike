@@ -21,7 +21,7 @@ const BuildSpecial:CritterBuilder = (type:string, tile:Tile, rng?:Random)=>{
             onInteract:(player:Player,game:Game)=>{
                 game.buildMessage(`You eat from your ${name}.`);
                 if (rng) {
-                    player.feed(rng.getNumber(1,3));
+                    player.feed(rng.getNumber(3,5));
                 } else {
                     player.feed(2);
                 }

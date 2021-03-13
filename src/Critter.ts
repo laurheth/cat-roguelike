@@ -13,7 +13,7 @@ export interface CritterParams {
 export default class Critter {
     protected currentTile:Tile;
     protected _appearance:Appearance;
-    private lookLeft:boolean;
+    protected lookLeft:boolean;
     protected alive:boolean;
     private onInteract:((player:Player,game:Game)=>void)|undefined;
     constructor(params:CritterParams) {
@@ -67,6 +67,9 @@ export default class Critter {
                 // Update our position
                 this.currentTile = moveTo;
                 moveSuccess = true;
+            } else if (moveTo.isDoor && this instanceof Player && this.hasKey()) {
+                this.useKey(moveTo);
+                moveSuccess=true;
             }
         }
         if(moveSuccess) {
@@ -101,4 +104,5 @@ export default class Critter {
         }
         return false;
     }
+    public useKey(tile:Tile){}
 }
