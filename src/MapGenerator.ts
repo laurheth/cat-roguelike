@@ -264,9 +264,17 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
 
     // Critters
     const numCritters = targetRooms;
+    const possibleFoes:{weight:number,option:string}[] = [];
+    possibleFoes.push({
+        weight: 5,
+        option: 'mouse'
+    }, {
+        weight: 1,
+        option: 'ghost'
+    });
     for(let i=0;i<numCritters;i++) {
         const foe = new Foe({
-            type:'mouse',
+            type:rng.getWeightedElement(possibleFoes),
             startTile: rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
             rng:rng,
             event:game.event,
@@ -285,7 +293,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     }
     
     // Need food?
-    if(status.hunger > 8) {
+    if(status.hunger > 8 || level===10) {
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
 

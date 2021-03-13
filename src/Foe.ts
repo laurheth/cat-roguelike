@@ -21,12 +21,14 @@ export default class Foe extends Critter {
     private enthusiasm:number;
     private event:EventManager;
     private hp:number;
+    private armor:number;
     private xp:number;
     private dmg:[number,number];
     private foodValue:number;
     private game:Game;
     private attackVerb:string;
     private corpseType:itemTypes;
+    private noCorpse:boolean;
     constructor(params:FoeParams) {
         const { type, startTile, rng, event, game, ...rest } = params;
         const critterParams:CritterParams = {
@@ -38,12 +40,14 @@ export default class Foe extends Critter {
         };
         let enthusiasm = 5;
         let hp=5;
+        let armor=0;
         let xp=2;
         let foodValue=4;
         let dmg:[number,number]=[1,3];
         let attackVerb = "attacks";
         let name=type;
         let corpseType:itemTypes="food";
+        let noCorpse=false;
         switch(type) {
             case 'Yendor':
                 critterParams.appearance = {
@@ -57,6 +61,7 @@ export default class Foe extends Critter {
                 name="Mouse of Yendor";
                 corpseType="victory";
                 break;
+            default:
             case 'mouse':
                 critterParams.appearance = {
                     content:'<img src="./assets/mouse.png" alt="A mouse.">',
@@ -65,13 +70,23 @@ export default class Foe extends Critter {
                 hp = 6 + game.level/2;
                 attackVerb = "bites";
                 break;
-            default:
+            case 'ghost':
+                critterParams.appearance = {
+                    content:'<img src="./assets/ghost.png" alt="A ghost.">',
+                    classList:['ghost']
+                };
+                hp = 5;
+                armor = Math.min(5,game.level);
+                attackVerb = "haunts";
+                noCorpse=true;
+                break;
             case 'bug':
                 critterParams.appearance = {
                     content:'b',
                     classList:['bug']
                 };
                 hp = 4 + game.level/3;
+                armor = 1;
                 foodValue = 2;
                 attackVerb = "bites"
                 break;
@@ -91,6 +106,8 @@ export default class Foe extends Critter {
         this.game=game;
         this.attackVerb = attackVerb;
         this.corpseType = corpseType;
+        this.armor=armor;
+        this.noCorpse = noCorpse;
     }
 
     get appearance() {
@@ -139,6 +156,11 @@ export default class Foe extends Critter {
     }
 
     attackMe(damage:number) {
+        damage = damage - this.armor;
+        if(damage <= 0.5) {
+            this.game.buildMessage("It's not very effective...");
+            damage = 0.5;
+        }
         this.hp -= damage;
         if (this.hp <= 0) {
             this.die();
@@ -149,16 +171,22 @@ export default class Foe extends Critter {
     }
 
     public die() {
-        this.game.buildMessage(`The ${this.type} dies!`,"good");
-        const corpse = new Item({
-            appearance:this._appearance,
-            tile:this.currentTile,
-            type:this.corpseType,
-            name:`dead ${this.type}`,
-            value:this.foodValue,
-        });
-        corpse.appearance.classList.push('dead');
-        this.currentTile.addClass("blood");
+        if(this.type === "ghost") {
+            this.game.buildMessage(`The ${this.type} was banished!`,"good");
+        } else {
+            this.game.buildMessage(`The ${this.type} dies!`,"good");
+        }
+        if (!this.noCorpse) {
+            const corpse = new Item({
+                appearance:this._appearance,
+                tile:this.currentTile,
+                type:this.corpseType,
+                name:`dead ${this.type}`,
+                value:this.foodValue,
+            });
+            corpse.appearance.classList.push('dead');
+            this.currentTile.addClass("blood");
+        }
         super.die();
     }
 }
