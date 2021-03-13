@@ -69,7 +69,11 @@ const addEnd = (allTiles:Tile[],rng:Random,level:number,game:Game) => {
 }
 
 const themes:{[key:string]:string[]}[] = [
-    {'#':['wall'],'.':['floor']}
+    {'#':['wall'],'.':['floor']},
+    {'#':['redWall'],'.':['floor']},
+    {'#':['blueWall'],'.':['floor']},
+    {'#':['greenWall'],'.':['floor']},
+    {'#':['purpleWall'],'.':['floor']},
 ];
 
 /** Home is where your human lives */
@@ -167,8 +171,8 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     if (level <= 0 || level > maxLevel ) {
         return generateApartment(game);
     }
-    const hallTheme = rng.getRandomElement(themes);
-    const roomTheme = rng.getRandomElement(themes);
+    const hallTheme = themes[0];
+    let roomTheme = themes[0];
 
     let targetRooms = 5;
     const sizeRange:[number,number] = [4,6];
@@ -188,6 +192,9 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     let startTile:Tile|undefined=undefined;
     const allTiles:Tile[] = [];
     while(rooms <= targetRooms) {
+        if(rng.getRandom() > (1 - level/20)) {
+            roomTheme = rng.getRandomElement(themes);
+        }
         // Make a room
         const newRoom = rectangleRoom(sizeRange,rng,roomTheme);
         // Put it into a form usable by the hallway maker

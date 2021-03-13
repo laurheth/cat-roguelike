@@ -176,6 +176,25 @@ main {
     color: white;
     font-weight: bold;
 }
+.redWall {
+    background: rgb(50,0,0);
+    color: rgb(200,0,0);
+}
+
+.blueWall {
+    background: rgb(0,0,150);
+    color: rgb(100,100,250);
+}
+
+.greenWall {
+    background: rgb(0,100,0);
+    color: rgb(120,200,120);
+}
+
+.purpleWall {
+    background: rgb(80,0,100);
+    color: rgb(200,120,210);
+}
 
 .critter {
     color: white;
