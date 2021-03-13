@@ -27,6 +27,7 @@ export default class Tile {
     public seeThrough:boolean;
     public remembered:number;
     public isStair:boolean;
+    public isPortal:boolean;
     private seen:boolean;
     constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
@@ -40,6 +41,7 @@ export default class Tile {
         this.remembered=1;
         this.extraClass=[];
         this.isStair=false;
+        this.isPortal=false;
     }
 
     /** Get neigjbour tile along a direction */
@@ -134,6 +136,14 @@ export default class Tile {
             this.lastSeenAppearance = appearance;
             return appearance;
         }
+    }
+
+    public getTileContent() {
+        return this.appearance.content;
+    }
+
+    public setContent(str:string) {
+        this.appearance.content = str;
     }
 
     public setTile(appearance:Appearance) {

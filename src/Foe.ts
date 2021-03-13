@@ -50,7 +50,7 @@ export default class Foe extends Critter {
                     content:`<img src="./assets/yendorMouse.png" alt="Mouse of Yendor">`,
                     classList:['mouse']
                 }
-                hp=40;
+                hp=1;
                 xp=0;
                 foodValue=0;
                 dmg=[2,4];

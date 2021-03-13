@@ -47,7 +47,7 @@ export default class Player extends Critter {
         this.game = game;
         this.fear = 0;
         this.hunger = 0;
-        this.sharpness = 5;
+        this.sharpness = 2;
         this.maxFear = 10;
         this.maxHunger = 10;
         this.maxSharpness = 10;
@@ -61,7 +61,7 @@ export default class Player extends Critter {
         this.alive=true;
         this.fear = 0;
         this.hunger = 0;
-        this.sharpness = 5;
+        this.sharpness = 2;
         this.maxFear = 10;
         this.maxHunger = 10;
         this.maxSharpness = 10;
@@ -94,6 +94,14 @@ export default class Player extends Critter {
 
     /** Act */
     act() {
+        // Enter portal if we entered one
+        if (this.currentTile.isPortal) {
+            this.game.buildMessage("You pass through the rift in spacetime, and enter the Cat Dimension! Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
+            this.game.newLevel(this.game.level+1,this.game.map,this);
+        }
+        if (this.game.level===0 && this.turnCount===2) {
+            this.game.buildMessage("First things first: destroy the house, and then enter the mystic portal!","good");
+        }
         // Update view
         this.fov.look(this.currentTile);
         // Update status
@@ -133,7 +141,7 @@ export default class Player extends Critter {
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);
                         },
-                        button:['>','<','Enter']
+                        button:['>','<']
                     })
                 }
                 // Is there an item to pick up?
@@ -152,11 +160,12 @@ export default class Player extends Critter {
                                         this.currentTile.item = null;
                                     }
                                     document.removeEventListener('keydown',eventHandler);
+                                    this.game.newLevel(this.game.level+1,this.game.map,this);
                                     this.win();
                                     resolve(true);
                                 }
                             },
-                            button:["g","p","Enter"]
+                            button:["g","p"]
                         });
                     } else {
                         this.game.buildMessage(`You see here a ${this.currentTile.item.name}.`);
@@ -176,7 +185,7 @@ export default class Player extends Critter {
                                     resolve(true);
                                 }
                             },
-                            button:["g","p","Enter"]
+                            button:["g","p"]
                         });
                     }
                 }
@@ -192,7 +201,7 @@ export default class Player extends Critter {
                                 document.removeEventListener('keydown',eventHandler);
                                 resolve(true);
                             },
-                            button:["u","e","Enter"]
+                            button:["u","e"]
                         });
                     }
                     // Drop the item?
@@ -358,21 +367,25 @@ export default class Player extends Critter {
             case 'Right':
             case '6':
             case 'ArrowRight':
+            case 'l':
                 acted = this.step(1,0);
                 break;
             case 'Left':
             case 'ArrowLeft':
             case '4':
+            case 'h':
                 acted = this.step(-1,0);
                 break;
             case 'Up':
             case 'ArrowUp':
             case '8':
+            case 'k':
                 acted = this.step(0,-1);
                 break;
             case 'Down':
             case 'ArrowDown':
             case '2':
+            case 'j':
                 acted = this.step(0,1);
                 break;
             case 'Period':

@@ -2,8 +2,8 @@ import Tile from './Tile';
 import { Appearance } from './commonInterfaces';
 import { Random } from 'roguelike-pumpkin-patch';
 
-const nonSeeThrough = ['#'];
-const nonPassable = ['#'];
+const nonSeeThrough = ['#','+'];
+const nonPassable = ['#','F','+'];
 
 /**
  * Takes a 2d array and builds some interconnected tiles with it.

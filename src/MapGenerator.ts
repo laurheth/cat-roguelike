@@ -71,8 +71,101 @@ const themes:{[key:string]:string[]}[] = [
     {'#':['wall'],'.':['floor']}
 ];
 
+/** Home is where your human lives */
+const generateApartment = (game:Game)=>{
+    const plan = [
+        "########",
+        "#*...SF#",
+        "#CT....#",
+        "#......+",
+        "#...P..#",
+        "#......#",
+        "#s.....#",
+        "##+#####",
+    ];
+
+    if(game.level>10) {
+        plan[1] = "#....SF#";
+        plan[5] = "#..R...#";
+    }
+
+    const theme = {
+        '.':['floor'],
+        '#':['wall'],
+        'C':[],
+        'T':[],
+        'U':[],
+        'F':[],
+        'S':[],
+        'P':[]
+    }
+
+    // Generate room given the theme and plan
+    const newRoom = RoomBuilder(plan.map(x=>x.split('')),theme);
+    const roomRow:Tile[] = [];
+    newRoom.forEach(row=>row.forEach(col=>{
+        if(col){roomRow.push(col)}
+    }));
+
+    // Next, swap out letters for graphics where possible
+    const letterReplace:{[key:string]:string} = {
+        's':`<img src="./assets/shoes.png" alt="Shoes">`,
+        'F':`<img src="./assets/fridge.png" alt="Fridge">`,
+        '+':`<img src="./assets/locked.png" alt="Door">`,
+    };
+    roomRow.forEach(x=>{
+        if(x.getTileContent() === 'P') {
+            x.setTile({
+                content:'.',
+                classList:['floor'],
+            })
+            BuildSpecial("post",x,undefined);
+        } else if (x.getTileContent() === 'T') {
+            x.setTile({
+                content:'.',
+                classList:['floor'],
+            })
+            BuildSpecial("table",x,undefined);
+        } else if (x.getTileContent() === 'C') {
+            x.setTile({
+                content:'.',
+                classList:['floor'],
+            })
+            BuildSpecial("chair",x,undefined);
+        } else if (x.getTileContent() === 'S') {
+            x.setTile({
+                content:'.',
+                classList:['floor'],
+            })
+            BuildSpecial("bowl",x,undefined);
+        } else if (x.getTileContent() === '*') {
+            x.setTile({
+                content:`<img src="./assets/portal.png" alt="Portal">`,
+                classList:['portal']
+            });
+            x.isPortal = true;
+        } else if (x.getTileContent() === 'R') {
+            x.setTile({
+                content:`<img src="./assets/yendorMouse.png" alt="Dead Mouse of Yendor">`,
+                classList:['mouse','dead','blood'],
+            });
+        }
+        if (x.getTileContent() in letterReplace) {
+            x.setContent(letterReplace[x.getTileContent()]);
+        }
+    });
+    return {
+        startTile:newRoom[5][2] as Tile,
+        allTiles:roomRow
+    }
+};
+
 /** Function to generate a map */
 const generateMap = (level:number, rng:Random, game:Game)=>{
+    const maxLevel=10;
+    if (level <= 0 || level > maxLevel ) {
+        return generateApartment(game);
+    }
     const hallTheme = rng.getRandomElement(themes);
     const roomTheme = rng.getRandomElement(themes);
 

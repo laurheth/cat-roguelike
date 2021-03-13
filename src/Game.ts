@@ -138,7 +138,7 @@ export default class Game {
         );
 
         this.event = new EventManager({type:'simple'});
-        this.level=1;
+        this.level=0;
         this.map = this.startGame();
         const tile = this.map.startTile;
         if(tile) {
@@ -161,9 +161,9 @@ export default class Game {
     startGame(oldMap?:Map,player?:Player):Map {
         this.clearEvent();
         this.clearMessages();
-        this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the cat dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe. Space is weird here, but you've come here many times for naps; you can handle it! Keep your claws sharp, your belly full, and don't get too scared. Good luck!","good");
+        this.buildMessage("Welcome to the Furball Catacombs! You are a cat, and your human doesn't know how to hunt. There is only one solution: enter the Cat Dimension, find the Mouse of Yendor, defeat it, and leave it in your human's shoe.","good");
         this.sendMessage();
-        this.level=1;
+        this.level=0;
         const map = this.newLevel(this.level,oldMap,player);
         if(player) {
             player.resetStats();

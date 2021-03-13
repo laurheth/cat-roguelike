@@ -213,6 +213,19 @@ main {
     font-weight: normal;
 }
 
+@keyframes rotate {
+    0% {
+        transform: rotate(0turn);
+    }
+    100% {
+        transform: rotate(-1turn);
+    }
+}
+
+.portal {
+    animation: rotate 2s linear infinite;
+}
+
 @media(max-height:800px) {
     .statusBar {
         grid-row: 1/3;
