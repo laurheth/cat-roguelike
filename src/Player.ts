@@ -295,8 +295,11 @@ export default class Player extends Critter {
     honger() {
         if(this.turnCount % 50 === 0) {
             this.hunger++;
+            this.fear = Math.max(0,this.fear - 1);
             if (this.hunger === this.maxHunger-1) {
                 this.game.buildMessage("You are starving!","bad");
+            } else if (this.hunger === this.maxHunger - 2) {
+                this.game.buildMessage("You are getting hungry!","bad");
             }
         }
         if (this.hunger >= this.maxHunger) {

@@ -310,15 +310,26 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     }
     
     // Need food?
-    if(status.hunger > 8 || level===10) {
+    if(status.hunger > 5 || level===10) {
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
 
     const specialItems = ['catnip','bomb'];
-    ItemBuilder(
-        rng.getRandomElement(specialItems),
-        rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
-    );
+    if(level < 10) {
+        if(level >= 5 || rng.getRandom() < level * 0.2) {
+            ItemBuilder(
+                rng.getRandomElement(specialItems),
+                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
+            );
+        }
+    } else {
+        specialItems.forEach(item=>{
+            ItemBuilder(
+                item,
+                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
+            );
+        });
+    }
 
     // Set somewhere to be the stairs down; this is only if it failed to work earlier
     if(!endAdded) {

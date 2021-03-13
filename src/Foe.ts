@@ -29,6 +29,7 @@ export default class Foe extends Critter {
     private attackVerb:string;
     private corpseType:itemTypes;
     private noCorpse:boolean;
+    private dieVerb:string;
     constructor(params:FoeParams) {
         const { type, startTile, rng, event, game, ...rest } = params;
         const critterParams:CritterParams = {
@@ -42,9 +43,10 @@ export default class Foe extends Critter {
         let hp=5;
         let armor=0;
         let xp=2;
-        let foodValue=4;
+        let foodValue=2;
         let dmg:[number,number]=[1,3];
         let attackVerb = "attacks";
+        let dieVerb = "dies";
         let name=type;
         let corpseType:itemTypes="food";
         let noCorpse=false;
@@ -80,6 +82,7 @@ export default class Foe extends Critter {
                 dmg=[2,5];
                 attackVerb = "haunts";
                 noCorpse=true;
+                dieVerb="was banished"
                 break;
             case 'bug':
                 critterParams.appearance = {
@@ -88,7 +91,7 @@ export default class Foe extends Critter {
                 };
                 hp = 4 + game.level/3;
                 armor = 1;
-                foodValue = 2;
+                foodValue = 1;
                 attackVerb = "bites"
                 break;
         }
@@ -109,6 +112,7 @@ export default class Foe extends Critter {
         this.corpseType = corpseType;
         this.armor=armor;
         this.noCorpse = noCorpse;
+        this.dieVerb = dieVerb;
     }
 
     get appearance() {
@@ -172,11 +176,7 @@ export default class Foe extends Critter {
     }
 
     public die() {
-        if(this.type === "ghost") {
-            this.game.buildMessage(`The ${this.type} was banished!`,"good");
-        } else {
-            this.game.buildMessage(`The ${this.type} dies!`,"good");
-        }
+        this.game.buildMessage(`The ${this.type} ${this.dieVerb}!`,"good");
         if (!this.noCorpse) {
             const corpse = new Item({
                 appearance:this._appearance,
