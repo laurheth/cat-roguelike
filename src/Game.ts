@@ -49,6 +49,7 @@ export default class Game {
     player:Player;
     // Touch handler
     touch:TouchHandler;
+    // Hamburger menuing for the status bar
     /** Constructor, start the game! */
     constructor() {
         // Grab every elements we're going to need
@@ -161,6 +162,25 @@ export default class Game {
 
         // Touch events
         this.touch = new TouchHandler(this.displayDiv);
+
+        // Hamburgering
+        let open=false;
+        const hamburger = document.getElementById("hamburger");
+        const statusBar = document.getElementById("statusBar");
+        if (hamburger && statusBar) {
+            hamburger.addEventListener("click",(e)=>{
+                e.preventDefault();
+                if (open) {
+                    open=false;
+                    hamburger.classList.remove("clicked");
+                    statusBar.classList.remove("open");
+                } else {
+                    open=true;
+                    hamburger.classList.add("clicked");
+                    statusBar.classList.add("open");
+                }
+            })
+        }
     }
 
     /** Start from the beginning */
