@@ -69,7 +69,10 @@ const ItemBuilder = (type:string,tile:Tile) => {
                                 content:'.',
                                 classList:['floor','scorch']
                             })
+                            tile.isMess=true;
+                            game.messList.push(tile);
                         })
+                        game.messOutOfDate=true;
                     }
                 });
                 return null;

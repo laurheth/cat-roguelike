@@ -49,7 +49,10 @@ export default class Game {
     player:Player;
     // Touch handler
     touch:TouchHandler;
-    // Hamburger menuing for the status bar
+    messList:Tile[];
+    messVersion:number;
+    roboVacuums:number=0;
+    public messOutOfDate:boolean=false;
     /** Constructor, start the game! */
     constructor() {
         // Grab every elements we're going to need
@@ -141,6 +144,8 @@ export default class Game {
             },6
         );
 
+        this.messList = [];
+        this.messVersion = 0;
         this.event = new EventManager({type:'complex'});
         this.level=0;
         this.map = this.startGame();
@@ -204,6 +209,11 @@ export default class Game {
     newLevel(level:number,oldMap?:Map,player?:Player):Map {
         // Empty event manage of previous level's critters
         this.clearEvent();
+        // Clear messes
+        while(this.messList.length > 0) {
+            this.messList.pop();
+        }
+        this.roboVacuums = 0;
         // Build the map
         this.level=level;
         const newMap = MapGenerator(level,this.random,this);
@@ -368,5 +378,59 @@ export default class Game {
             // Start the game
             this.start();
         });
+    }
+
+    /** Clean a tile */
+    cleanTile(tile:Tile) {
+        this.messList = this.messList.filter(x=>x!==tile);
+        tile.setTile({
+            content:'.',
+            classList:['floor'],
+        })
+        tile.isMess=false;
+        tile.removeClass('blood');
+        tile.removeClass('barf');
+        this.messOutOfDate=true;
+    }
+
+    /** Update pathing for messes */
+    updateMessMap() {
+        // No vacuums; don't bother!
+        if(this.roboVacuums <= 0) {
+            return;
+        }
+        this.messVersion++;
+        this.messOutOfDate=false;
+        const range = 20;
+        let distance = 0;
+        const toCheck:Tile[] = [...this.messList];
+        const expandRange:Tile[] = [];
+        const checked:Tile[] = [];
+        const steps = [[-1,0],[1,0],[0,1],[0,-1]];
+        while(distance <= range) {
+            toCheck.forEach(x=>x.lastUpdated = this.messVersion);
+            while(toCheck.length > 0) {
+                const checkThis = toCheck.pop();
+                if (checkThis) {
+                    checked.push(checkThis);
+                    checkThis.messDistance = distance;
+                    steps.forEach(step=>{
+                        const x = checkThis.getNeighbour(step);
+                        if (x && x.passable) {
+                            if(x.lastUpdated < this.messVersion) {
+                                expandRange.push(x);
+                            }
+                        }
+                    });
+                }
+            }
+            distance++;
+            while(expandRange.length > 0) {
+                const next = expandRange.pop();
+                if (next) {
+                    toCheck.push(next);
+                }
+            }
+        }
     }
 }

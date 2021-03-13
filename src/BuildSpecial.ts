@@ -19,7 +19,7 @@ const BuildSpecial:CritterBuilder = (type:string, tile:Tile, rng?:Random)=>{
                 classList:[]
             },
             onInteract:(player:Player,game:Game)=>{
-                game.buildMessage(`You eat from your ${name}.`);
+                game.buildMessage(`You eat from the ${name}.`);
                 if (rng) {
                     player.feed(rng.getNumber(3,5));
                 } else {

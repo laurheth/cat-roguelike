@@ -274,29 +274,53 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
 
     // Critters
     const numCritters = targetRooms;
-    const possibleFoes:{weight:number,option:string}[] = [];
+    const possibleFoes:{weight:number,option:{type:string,food:number}}[] = [];
     possibleFoes.push({
         weight: 5,
-        option: 'mouse'
+        option: {
+            type:'mouse',
+            food:2
+        }
     });
     possibleFoes.push({
         weight: (level < 3) ? 2 : 5,
-        option: 'bug'
+        option: {
+            type:'bug',
+            food:1,
+        }
     });
-    if(level >= 7) {
+    if(level >= 4) {
         possibleFoes.push({
-            weight: 3,
-            option: 'ghost'
+            weight: 1,
+            option: {
+                type:'robovacuum',
+                food:0,
+            }
         });
     }
+    if(level >= 7) {
+        possibleFoes.push({
+            weight: (level < 10) ? 1 : 3,
+            option: {
+                type:'ghost',
+                food:0
+            }
+        });
+    }
+    let totalFood = 0;
     for(let i=0;i<numCritters;i++) {
+        const chosenOption = rng.getWeightedElement(possibleFoes);
+        totalFood += chosenOption.food;
         const foe = new Foe({
-            type:rng.getWeightedElement(possibleFoes),
+            type:chosenOption.type,
             startTile: rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
             rng:rng,
             event:game.event,
             game:game,
         })
+        if(chosenOption.type === "robovacuum") {
+            game.roboVacuums++;
+        }
         game.actors.push(foe);
         enemiesAdded++;
     }
@@ -310,7 +334,11 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     }
     
     // Need food?
-    if(status.hunger > 5 || level===10) {
+    const expectedHunger = status.hunger - totalFood + 0.5 * (allTiles.filter(x=>x.passable).length / 50);
+    for(let i=0;i<expectedHunger/4;i++) {
+        BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
+    }
+    if(level===10) {
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
 

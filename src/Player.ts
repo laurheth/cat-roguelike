@@ -109,6 +109,10 @@ export default class Player extends Critter {
         this.updateStatus();
         this.turnCount++;
         this.honger();
+        // Update mess list
+        if(this.game.messOutOfDate) {
+            this.game.updateMessMap();
+        }
         // Prepare for player input
         if (this.alive) {
             return new Promise(resolve => {
@@ -204,6 +208,20 @@ export default class Player extends Critter {
                             },
                             button:["g","p"]
                         });
+                        // Maybe use it right off the ground
+                        if(this.currentTile.item.usable) {
+                            const item = this.currentTile.item;
+                            this.actions.push({
+                                name:item.useVerb+" "+item.name,
+                                callback:()=>{
+                                    this.game.buildMessage(`You ${item.useVerb.toLowerCase()} the ${item.name}.`);
+                                    this.currentTile.item = item.use(this,this.game);
+                                    document.removeEventListener('keydown',eventHandler);
+                                    resolve(true);
+                                },
+                                button:["u","e"]
+                            });
+                        }
                     }
                 }
                 const item=this.item;
@@ -265,16 +283,21 @@ export default class Player extends Critter {
                                     }));
                                 }
                                 if (borfTile) {
+                                    borfTile.isMess=true;
+                                    this.game.messList.push(borfTile);
                                     borfTile.setTile({
                                         content:'~',
                                         classList:['barf']
                                     });
                                 } else {
+                                    this.currentTile.isMess=true;
+                                    this.game.messList.push(this.currentTile);
                                     this.currentTile.setTile({
                                         content:'~',
                                         classList:['barf']
                                     });
                                 }
+                                this.game.messOutOfDate=true;
                             }
                             document.removeEventListener('keydown',eventHandler);
                             resolve(true);

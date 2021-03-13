@@ -26,10 +26,13 @@ export default class Tile {
     public passable:boolean;
     public seeThrough:boolean;
     public remembered:number;
+    public messDistance:number;
+    public lastUpdated:number;
     public isStair:boolean;
     public isPortal:boolean;
     public isDoor:boolean;
     private seen:boolean;
+    public isMess:boolean;
     constructor(neighours:Neighbours,appearance:Appearance, passable:boolean, seeThrough:boolean) {
         this.neighbours = neighours;
         this.appearance = appearance;
@@ -44,6 +47,9 @@ export default class Tile {
         this.isStair=false;
         this.isPortal=false;
         this.isDoor=false;
+        this.lastUpdated=0;
+        this.messDistance=0;
+        this.isMess = false;
     }
 
     public open() {
@@ -99,6 +105,7 @@ export default class Tile {
         }
         return toReturn;
     }
+
     /** Apply to all neighbours */
     public applyToAll(check:(tile:Tile)=>boolean,range:number):Tile[] {
         let toReturn:Tile[] = [];

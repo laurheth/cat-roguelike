@@ -164,6 +164,7 @@ main {
     padding: 10px;
     background: rgb(20,20,20);
     border-right: 4px solid rgb(40,40,40);
+    overflow-y: auto;
 }
 
 .statusBar h2, .statusBar h3, .statusBar li, .statusBar p {
