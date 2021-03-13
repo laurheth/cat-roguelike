@@ -23,8 +23,6 @@ export default class FOV {
     public look(startTile:Tile) {
         this.clearView(startTile);
         const displayPosition:Array<number> = [0,0];
-        const seeThroughKnown:Array<Tile> = [startTile];
-        const blockingKnown:Array<Tile> = [];
 
         // Keep track of what has been seen. We will use this for post-processing
         const seen:Array<Array<Tile|null>> = [];
@@ -50,6 +48,9 @@ export default class FOV {
 
         // For each quadrant
         quadrants.forEach(quadrant=>{
+            // Move these in here, so they are separate for each quadrant.
+            const seeThroughKnown:Array<Tile> = [startTile];
+            const blockingKnown:Array<Tile> = [];
             // Use a method of slope to work this out
             for( let rise = -this.range*2; rise<=this.range*2; rise += this.angleStepDensity ) {
                 const slope = rise / this.range;

@@ -200,6 +200,8 @@ export default class Game {
 
     /** Go to a new level */
     newLevel(level:number,oldMap?:Map,player?:Player):Map {
+        // Empty event manage of previous level's critters
+        this.clearEvent();
         // Build the map
         this.level=level;
         const newMap = MapGenerator(level,this.random,this);

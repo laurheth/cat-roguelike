@@ -171,6 +171,14 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     if (level <= 0 || level > maxLevel ) {
         return generateApartment(game);
     }
+
+    // Can we get some stats for the player?
+    const status = game.player.getStats();
+    const averageEnemyHp = 5+level/2;
+    const avgDmg = status.maxSharpness/2;
+    const attacksPerEnemy = Math.ceil(averageEnemyHp / avgDmg);
+    const dullnessPerEnemy = 0.3 * attacksPerEnemy - 0.2;
+
     const hallTheme = themes[0];
     let roomTheme = themes[0];
 
@@ -187,6 +195,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     } else if (level>1) {
         targetRooms = 7;
     }
+    let enemiesAdded=0;
     let rooms=0;
     let endAdded=false;
     let startTile:Tile|undefined=undefined;
@@ -253,20 +262,32 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
         rooms++;
     }
 
-    // Add a critter?
-    const foe = new Foe({
-        type:'mouse',
-        startTile: rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
-        rng:rng,
-        event:game.event,
-        game:game,
-    })
-    game.actors.push(foe);
+    // Critters
+    const numCritters = targetRooms;
+    for(let i=0;i<numCritters;i++) {
+        const foe = new Foe({
+            type:'mouse',
+            startTile: rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
+            rng:rng,
+            event:game.event,
+            game:game,
+        })
+        game.actors.push(foe);
+        enemiesAdded++;
+    }
 
     // Add some scratching posts?
-    BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
-    BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
-    BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
+    const finalSharpness = status.sharpness - enemiesAdded*dullnessPerEnemy;
+    const goalSharpness = 1+status.maxSharpness/2;
+    const postsNeeds = (goalSharpness - finalSharpness) / 2
+    for(let i=0;i<Math.min(1,postsNeeds);i++) {
+        BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
+    }
+    
+    // Need food?
+    if(status.hunger > 8) {
+        BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
+    }
 
     // Set somewhere to be the stairs down; this is only if it failed to work earlier
     if(!endAdded) {

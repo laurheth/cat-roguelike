@@ -357,6 +357,14 @@ export default class Player extends Critter {
         }
     }
 
+    getStats() {
+        return {
+            sharpness:this.sharpness,
+            maxSharpness:this.maxSharpness,
+            hunger:this.hunger,
+        }
+    }
+
     attackMe(damage:number) {
         this.fear += damage;
         if (this.fear >= this.maxFear) {
