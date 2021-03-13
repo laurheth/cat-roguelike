@@ -154,7 +154,9 @@ export default class Game {
                 game:this,
             });
             this.event.add(this.player);
-            this.start();
+            this.player.updateStatus();
+            this.player.fov.look(tile);
+            this.setupCreationModal();
         } else {
             // Update this to figure out an alternative (i.e. maybe try again?)
             throw new Error("No initial tile found.");
@@ -334,5 +336,37 @@ export default class Game {
                 }
             }
         }
+    }
+
+    /** Character creation modal */
+    setupCreationModal() {
+        // Get the modal
+        const modal = document.getElementById("customizationModal") as HTMLElement;
+        // Get the form
+        const form = document.getElementById("customizationForm") as HTMLFormElement;
+        // Add event listener to the form
+        form.addEventListener("submit",(e)=>{
+            e.preventDefault();
+            // Name
+            const textElement = document.getElementById("name") as HTMLInputElement;
+            let name="Jim";
+            if(textElement && textElement.value) {
+                name = textElement.value;
+            } else {
+                const names = ["Jim", "Mister", "Meatball", "Betty", "Flower", "Furball"];
+                name = this.random.getRandomElement(names);
+            }
+            const nameElement = document.getElementById("playerName") as HTMLElement;
+            nameElement.innerText = name;
+            // Cat type
+            const selected = document.querySelector(".customization fieldset input:checked") as HTMLInputElement | null;
+            if(selected) {
+                this.player.appearance.content = `<img src="./assets/${selected.value}.png" alt="Cat">`;
+            }
+            // Close the modal
+            modal.style.display = "none";
+            // Start the game
+            this.start();
+        });
     }
 }

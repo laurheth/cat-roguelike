@@ -16,11 +16,32 @@
             <div class="meat"></div>
         </button>
     </div>
+    <div id="customizationModal" class="customization">
+        <form id="customizationForm">
+            <h2>Feline Character Creation</h2>
+            <label for="name">You are a cat! Wow! What is your name?</label>
+            <input type="text" name="name" id="name" placeholder="i.e. Jim, Mister, Catto" maxlength="13">
+            <fieldset>
+                <legend>What colour fur do you have?</legend>
+                <div>
+                    <input class="visuallyHidden" type="radio" name="cat" id="orange" value="cat">
+                    <label for="orange"><img src="./assets/cat.png" alt="Orange"></label>
+                    <input class="visuallyHidden" type="radio" name="cat" id="gray" value="grayCat">
+                    <label for="gray"><img src="./assets/grayCat.png" alt="Gray"></label>
+                    <input class="visuallyHidden" type="radio" name="cat" id="black" value="blackCat">
+                    <label for="black"><img src="./assets/blackCat.png" alt="Black"></label>
+                    <input class="visuallyHidden" type="radio" name="cat" id="white" value="whiteCat">
+                    <label for="white"><img src="./assets/whiteCat.png" alt="White"></label>
+                </div>
+            </fieldset>
+            <button type="submit">Create this cat!</button>
+        </form>
+    </div>
     <div class="wrapper">
         <main>
             <!-- Game info / player status -->
             <div class="statusBar" id="statusBar">
-                <h2 id="playerName">Jim the cat</h2>
+                <h2 id="playerName">Cat</h2>
                 <h3>Status:</h3>
                 <ul>
                     <li>Fear: <span id="fear">0/10</span></li>

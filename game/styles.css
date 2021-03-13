@@ -2,7 +2,7 @@ html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}bo
 
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
-.visuallyHidden:not(:focus):not(:active) { position: absolute; width: 1px; height: 1px; margin: -1px;border: 0;padding: 0;white-space: nowrap;clip-path: inset(100%);clip: rect(00 0 0);overflow: hidden;}
+.visuallyHidden { position: absolute; width: 1px; height: 1px; margin: -1px;border: 0;padding: 0;white-space: nowrap;clip-path: inset(100%);clip: rect(0 0 0 0);overflow: hidden;}
 
 /* Typographic styles */
 html {
@@ -17,7 +17,8 @@ body {
 }
 
 h2 {
-    font-size: 3.5rem;
+    font-size: 3.2rem;
+    word-break: break-word;
 }
 
 h3 {
@@ -60,6 +61,101 @@ main {
     display: none;
 }
 
+/* Cat customization form */
+.customization {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 40;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.customization form {
+    background: rgb(20,20,20);
+    border: 4px solid rgb(40,40,40);
+    border-radius: 2rem;
+    padding: 1rem;
+    margin: 2rem;
+    width: auto;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.customization fieldset {
+    border: none;
+    padding: 0;
+}
+
+.customization fieldset legend {
+    display: block;
+    position: static;
+    width: 100%;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.customization fieldset div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.customization fieldset label {
+    display: block;
+    border: 2px solid rgb(40,40,40);
+    margin: 4px;
+    border-radius: 1rem;
+    transition: 0.3s;
+    box-shadow: 0 0 0 transparent;
+}
+
+.customization fieldset label:hover {
+    border: 2px solid rgb(120,120,120);
+}
+
+.customization img {
+    display: block;
+}
+
+.customization input:checked + label {
+    border: 2px solid red;
+    box-shadow: 0 0 1rem red;
+}
+
+.customization input[type="text"], .customization fieldset {
+    width: 100%;
+}
+
+.customization input[type="text"], .customization button {
+    background: black;
+    color: white;
+    font-family: 'Work Sans', sans-serif;
+    border: 2px solid rgb(200,200,200);
+    border-radius: 2.5rem;
+    padding: 4px 8px;
+    transition: 0.3s;
+    padding: 1rem;
+    text-align: center;
+}
+
+.customization input[type="text"]:hover, .customization button:hover,
+.customization input[type="text"]:focus, .customization button:focus {
+    border-color: red;
+    background: rgb(40,0,0);
+}
+
+.customization form > * {
+    margin: 1rem 0;
+}
+
 /* Status bar */
 .statusBar {
     grid-column: 1 / 2;
@@ -85,7 +181,7 @@ main {
     transition: 0.3s;
 }
 
-.statusBar button:hover, .statusBar button:focus {
+.statusBar button:focus, .statusBar button:focus {
     border-color: red;
     background: rgb(40,0,0);
 }
@@ -301,6 +397,10 @@ main {
     }
     main {
         grid-template-columns: 20rem auto;
+    }
+
+    .customization form {
+        width: auto;
     }
 }
 

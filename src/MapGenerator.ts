@@ -305,7 +305,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     const finalSharpness = status.sharpness - enemiesAdded*dullnessPerEnemy;
     const goalSharpness = Math.max(1+status.maxSharpness/2, status.sharpness + 1);
     const postsNeeds = (goalSharpness - finalSharpness) / 2
-    for(let i=0;i<Math.min(1,postsNeeds);i++) {
+    for(let i=0;i<Math.max(1,postsNeeds);i++) {
         BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
     
