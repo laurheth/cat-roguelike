@@ -223,6 +223,15 @@ main {
     font-weight: bold;
 }
 
+.explosion {
+    color: red;
+    background: yellow;
+}
+
+.scorch {
+    color: gray;
+}
+
 .blood {
     background: darkred;
 }

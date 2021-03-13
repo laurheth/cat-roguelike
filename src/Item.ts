@@ -1,10 +1,11 @@
 import Tile from "./Tile";
 import Player from './Player';
 import { Appearance } from "./commonInterfaces";
+import Game from './Game';
 
-type UseFunction = (item:Item, user:Player)=>(Item|null);
+type UseFunction = (item:Item, user:Player, game:Game)=>(Item|null);
 
-export type itemTypes = "food"|"key"|"victory";
+export type itemTypes = "food"|"key"|"victory"|"special";
 
 interface ItemParams {
     appearance:Appearance;
@@ -13,6 +14,7 @@ interface ItemParams {
     tile:Tile;
     value?:number;
     onUse?:UseFunction;
+    useVerb?:string;
 }
 
 
@@ -26,7 +28,7 @@ export default class Item {
     readonly type:itemTypes;
     readonly isKey:boolean;
     constructor(params:ItemParams) {
-        const { appearance, name, type, tile, value=0, ...rest } = params;
+        const { appearance, name, type, tile, value=0, useVerb="Use", ...rest } = params;
         let onUse = rest.onUse;
         this.type=type;
         this._appearance = appearance;
@@ -39,16 +41,18 @@ export default class Item {
         this.usable=false;
         this.name=name;
         this.value=value;
-        this.useVerb="Use";
+        this.useVerb=useVerb;
         if(type === "food") {
             this.usable = true;
             this.useVerb="Eat";
             if (!onUse) {
-                onUse = (item:Item, user:Player)=>{
+                onUse = (item:Item, user:Player,game:Game)=>{
                     user.feed(item.value);
                     return null;
                 }
             }
+        } else if(type === "special") {
+            this.usable = true;
         }
         if(type === "key") {
             this.isKey=true;
@@ -56,14 +60,14 @@ export default class Item {
             this.isKey=false;
         }
         if (!onUse) {
-            onUse = (item:Item, user:Player) => null;
+            onUse = (item:Item, user:Player, game:Game) => null;
         }
         this.onUse = onUse;
     }
 
     // Use the item. Return the item after use.
-    public use(user:Player) {
-        return this.onUse(this, user);
+    public use(user:Player,game:Game) {
+        return this.onUse(this, user, game);
     }
 
     get appearance() {

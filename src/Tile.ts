@@ -99,6 +99,42 @@ export default class Tile {
         }
         return toReturn;
     }
+    /** Apply to all neighbours */
+    public applyToAll(check:(tile:Tile)=>boolean,range:number):Tile[] {
+        let toReturn:Tile[] = [];
+        let distance = 0;
+        const toCheck:Tile[] = [this];
+        const expandRange:Tile[] = [];
+        const checked:Tile[] = [];
+        const steps = [[-1,0],[1,0],[0,1],[0,-1]];
+        while(distance <= range) {
+            while(toCheck.length > 0) {
+                const checkThis = toCheck.pop();
+                if (checkThis) {
+                    checked.push(checkThis);
+                    if(check(checkThis)) {
+                        toReturn.push(checkThis);
+                    }
+                    steps.forEach(step=>{
+                        const x = checkThis.getNeighbour(step);
+                        if (x) {
+                            if(!checked.includes(x) && !toCheck.includes(x)) {
+                                expandRange.push(x);
+                            }
+                        }
+                    });
+                }
+            }
+            distance++;
+            while(expandRange.length > 0) {
+                const next = expandRange.pop();
+                if (next) {
+                    toCheck.push(next);
+                }
+            }
+        }
+        return toReturn;
+    }
 
     /** Translate a step into a string key */
     private toKey(step:Step):string {

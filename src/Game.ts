@@ -20,7 +20,7 @@ interface Map {
 /** Container for the entire game */
 export default class Game {
     // Display related things
-    displayDiv:HTMLElement;
+    readonly displayDiv:HTMLElement;
     displayWidth:number;
     displayHeight:number;
     center:number[];
@@ -141,7 +141,7 @@ export default class Game {
             },6
         );
 
-        this.event = new EventManager({type:'simple'});
+        this.event = new EventManager({type:'complex'});
         this.level=0;
         this.map = this.startGame();
         const tile = this.map.startTile;

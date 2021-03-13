@@ -213,7 +213,7 @@ export default class Player extends Critter {
                             name:item.useVerb+" "+item.name,
                             callback:()=>{
                                 this.game.buildMessage(`You ${item.useVerb.toLowerCase()} the ${item.name}.`);
-                                this.item = item.use(this);
+                                this.item = item.use(this,this.game);
                                 document.removeEventListener('keydown',eventHandler);
                                 resolve(true);
                             },

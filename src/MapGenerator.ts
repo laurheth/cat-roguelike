@@ -5,6 +5,7 @@ import Game from './Game';
 import Foe from './Foe';
 import BuildSpecial from './BuildSpecial';
 import Item from './Item';
+import ItemBuilder from './ItemBuilder';
 
 /** Rectangleroom */
 const rectangleRoom = (range:[number,number], rng:Random,
@@ -268,10 +269,17 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     possibleFoes.push({
         weight: 5,
         option: 'mouse'
-    }, {
-        weight: 1,
-        option: 'ghost'
     });
+    possibleFoes.push({
+        weight: (level < 3) ? 2 : 5,
+        option: 'bug'
+    });
+    if(level >= 7) {
+        possibleFoes.push({
+            weight: 3,
+            option: 'ghost'
+        });
+    }
     for(let i=0;i<numCritters;i++) {
         const foe = new Foe({
             type:rng.getWeightedElement(possibleFoes),
@@ -296,6 +304,12 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     if(status.hunger > 8 || level===10) {
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
+
+    const specialItems = ['bomb'];
+    ItemBuilder(
+        rng.getRandomElement(specialItems),
+        rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
+    );
 
     // Set somewhere to be the stairs down; this is only if it failed to work earlier
     if(!endAdded) {

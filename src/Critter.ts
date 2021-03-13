@@ -91,6 +91,7 @@ export default class Critter {
     /** Stubs. */
     public act() {}
     attackMe(damage:number) {
+        this.die();
         return 0;
     }
     public die() {
@@ -105,4 +106,8 @@ export default class Critter {
         return false;
     }
     public useKey(tile:Tile){}
+
+    public getTile() {
+        return this.currentTile;
+    }
 }

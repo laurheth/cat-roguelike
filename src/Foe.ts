@@ -76,13 +76,14 @@ export default class Foe extends Critter {
                     classList:['ghost']
                 };
                 hp = 5;
-                armor = Math.min(5,game.level);
+                armor = 7;
+                dmg=[2,5];
                 attackVerb = "haunts";
                 noCorpse=true;
                 break;
             case 'bug':
                 critterParams.appearance = {
-                    content:'b',
+                    content:'<img src="./assets/bug.png" alt="A bug.">',
                     classList:['bug']
                 };
                 hp = 4 + game.level/3;
