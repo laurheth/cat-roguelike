@@ -86,7 +86,7 @@ const generateApartment = (game:Game)=>{
         "#......+",
         "#...P..#",
         "#......#",
-        "#s.....#",
+        "#s....N#",
         "##+#####",
     ];
 
@@ -144,6 +144,12 @@ const generateApartment = (game:Game)=>{
                 classList:['floor'],
             })
             BuildSpecial("bowl",x,undefined);
+        } else if (x.getTileContent() === 'N') {
+            x.setTile({
+                content:'.',
+                classList:['floor'],
+            })
+            ItemBuilder("catnip",x);
         } else if (x.getTileContent() === '*') {
             x.setTile({
                 content:`<img src="./assets/portal.png" alt="Portal">`,
@@ -157,7 +163,10 @@ const generateApartment = (game:Game)=>{
             });
         }
         if (x.getTileContent() in letterReplace) {
-            x.setContent(letterReplace[x.getTileContent()]);
+            x.setTile({
+                content: letterReplace[x.getTileContent()],
+                classList:['floor'],
+            });
         }
     });
     return {
@@ -294,7 +303,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
 
     // Add some scratching posts?
     const finalSharpness = status.sharpness - enemiesAdded*dullnessPerEnemy;
-    const goalSharpness = 1+status.maxSharpness/2;
+    const goalSharpness = Math.max(1+status.maxSharpness/2, status.sharpness + 1);
     const postsNeeds = (goalSharpness - finalSharpness) / 2
     for(let i=0;i<Math.min(1,postsNeeds);i++) {
         BuildSpecial("post",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
@@ -305,7 +314,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
 
-    const specialItems = ['bomb'];
+    const specialItems = ['catnip','bomb'];
     ItemBuilder(
         rng.getRandomElement(specialItems),
         rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))

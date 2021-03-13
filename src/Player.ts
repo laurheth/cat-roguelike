@@ -29,6 +29,7 @@ export default class Player extends Critter {
     private xp:number;
     private turnCount:number;
     private item:Item|null;
+    public powerful:boolean;
     private actions:{name:string,callback:()=>void,button:string[]}[]
     constructor(params:PlayerParams) {
         const { fov, startTile, statusUpdate, rng, game, ...rest } = params;
@@ -39,7 +40,7 @@ export default class Player extends Critter {
                 classList:['player']
             }
         });
-
+        this.powerful=false;
         this.item=null;
         this.fov = fov;
         this.statusUpdate = statusUpdate;
@@ -325,7 +326,11 @@ export default class Player extends Critter {
     calcDmg() {
         const min = Math.min(1,this.sharpness / 2);
         const max = Math.max(2, 1.5 * this.sharpness);
-        return this.rng.getNumber(min,max);
+        if (this.powerful) {
+            return 4*this.rng.getNumber(min,max);
+        } {
+            return this.rng.getNumber(min,max);
+        }
     }
 
     sharpenClaws(amount:number) {
@@ -366,7 +371,11 @@ export default class Player extends Critter {
     }
 
     attackMe(damage:number) {
-        this.fear += damage;
+        if (this.powerful) {
+            this.fear += Math.ceil(damage / 2);
+        } else {
+            this.fear += damage;
+        }
         if (this.fear >= this.maxFear) {
             this.game.buildMessage("You panic, and run for your life!","bad");
             this.die();

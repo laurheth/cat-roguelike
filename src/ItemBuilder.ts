@@ -76,6 +76,37 @@ const ItemBuilder = (type:string,tile:Tile) => {
             }
         });
         return newItem;
+    } else if(type==="catnip") {
+        const newItem = new Item({
+            type:"special",
+            tile:tile,
+            appearance: {
+                content: `<img src="./assets/catnip.png" alt="Catnip.">`,
+                classList:[]
+            },
+            name:"catnip",
+            useVerb:"Use",
+            onUse:(me:Item,user:Player,game:Game) => {
+                if (!user.powerful) {
+                    game.displayDiv.classList.add("high");
+                    user.powerful = true;
+                    game.buildMessage("You feel unstoppable!","good");
+                    game.event.add({
+                        delay: 21,
+                        callback:()=>{
+                            game.displayDiv.classList.remove("high");
+                            user.powerful = false;
+                            game.buildMessage("The catnip has worn off.","good");
+                        }
+                    });
+                    return null;
+                } else {
+                    game.buildMessage("Wait until the old stuff wears off!");
+                    return me;
+                }
+            }
+        });
+        return newItem;
     }
 }
 

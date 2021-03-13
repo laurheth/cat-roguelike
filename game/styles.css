@@ -113,6 +113,26 @@ main {
     user-select: none;
 }
 
+@keyframes high {
+    0% {
+        background: rgb(100,0,0);
+    }
+    25% {
+        background: rgb(0,100,0);
+    }
+    50% {
+        background: rgb(0,0,100);
+    }
+    100% {
+        background: rgb(100,0,0);
+    }
+}
+
+.display.high {
+    background: rgb(100,0,0);
+    animation: high 10s linear infinite;
+}
+
 /* Make images match the size of the surrounding text */
 .display img {
     width: 1em;

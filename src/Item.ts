@@ -32,7 +32,7 @@ export default class Item {
         let onUse = rest.onUse;
         this.type=type;
         this._appearance = appearance;
-        const possibleTile = tile.findEmptyNeigbour((tile:Tile)=>!tile.item);
+        const possibleTile = tile.findEmptyNeigbour((tile:Tile)=>!tile.item&&tile.passable);
         if (possibleTile) {
             possibleTile.item = this;
         } else {

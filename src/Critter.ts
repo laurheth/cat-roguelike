@@ -24,7 +24,7 @@ export default class Critter {
             ...rest
         } = params;
 
-        const possibleTile = startTile.findEmptyNeigbour((tile:Tile)=>!tile.critter);
+        const possibleTile = startTile.findEmptyNeigbour((tile:Tile)=>!tile.critter&&tile.passable);
         if (possibleTile) {
             this.currentTile = possibleTile;
         } else {
