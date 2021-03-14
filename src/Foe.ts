@@ -204,6 +204,9 @@ export default class Foe extends Critter {
         if(this.currentTile.lastUpdated === currentVersion) {
             if(this.currentTile.messDistance === 0) {
                 this.game.cleanTile(this.currentTile);
+                if(this.awake === this.enthusiasm) {
+                    this.game.buildMessage(`The ${this.type} cleans the mess!`);
+                }
                 return [0,0];
             }
             for(let i=-1;i<2;i++) {

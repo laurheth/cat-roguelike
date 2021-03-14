@@ -43,6 +43,7 @@ export default class Game {
     actionsElement:HTMLElement;
     // Messages element
     messagesElement:HTMLElement;
+    messageScroll:HTMLElement;
     messages:HTMLElement[]=[];
     nextMessage:HTMLElement|null=null;
     // The player
@@ -63,8 +64,9 @@ export default class Game {
         const itemElement:HTMLElement|null = document.getElementById("item");
         const actionsElement:HTMLElement|null = document.getElementById("specialActions");
         const messagesElement:HTMLElement|null = document.getElementById("messages");
+        const messageScroll:HTMLElement|null = document.getElementById("messageScroll");
         
-        if (displayDiv && fearElement && hungerElement && sharpnessElement && messagesElement && itemElement && actionsElement) {
+        if (displayDiv && fearElement && hungerElement && sharpnessElement && messagesElement && itemElement && actionsElement && messageScroll) {
             this.displayDiv = displayDiv;
             this.fearElement = fearElement;
             this.hungerElement = hungerElement;
@@ -72,6 +74,7 @@ export default class Game {
             this.messagesElement = messagesElement;
             this.itemElement = itemElement;
             this.actionsElement = actionsElement;
+            this.messageScroll = messageScroll;
         } else {
             throw new Error("Unable to get all elements on the page.");
         }
@@ -206,7 +209,7 @@ export default class Game {
     }
 
     /** Go to a new level */
-    newLevel(level:number,oldMap?:Map,player?:Player):Map {
+    newLevel(level:number,oldMap?:Map,player?:Player,tries=0):Map {
         // Empty event manage of previous level's critters
         this.clearEvent();
         // Clear messes
@@ -225,10 +228,15 @@ export default class Game {
         // Put the player on it
         if (player) {
             const startTile = newMap.startTile.findEmptyNeigbour((x=>!x.critter));
-            if (startTile && player.goTo(startTile)) {
+            if (startTile && player.goTo(startTile) && tries!==0) {
                 return newMap;
             } else {
-                throw new Error("Unable to generate map. Oh no!");
+                if(tries>=5) {
+                    throw new Error("Unable to generate map. Oh no!");
+                } else {
+                    // Well, damn. Retry a few times
+                    return this.newLevel(level,oldMap,player,tries+1);
+                }
             }
         }
         return newMap;
@@ -348,6 +356,8 @@ export default class Game {
                 }
             }
         }
+        // Scroll the messages element to its top
+        this.messageScroll.scrollTo(0,0);
     }
 
     /** Character creation modal */
