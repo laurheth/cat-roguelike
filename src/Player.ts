@@ -478,6 +478,7 @@ export default class Player extends Critter {
                 acted = this.step(0,1);
                 break;
             case 'Period':
+            case 'Clear':
             case '.':
             case '5':
                 acted=true;
