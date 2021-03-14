@@ -12,6 +12,7 @@ interface RoomOption {
     weight: number;
     option: {
         sizeReduction:number;
+        extraEnemies:number;
         fun:(range:[number,number],rng:Random,theme:{[key:string]:string[]})=>(Tile|null)[][]
     }
 }
@@ -202,7 +203,8 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             weight:2,
             option:{
                 sizeReduction:2,
-                fun:octoRoomSmall
+                fun:octoRoomSmall,
+                extraEnemies:1,
             }
         }
     ];
@@ -213,6 +215,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             option:{
                 sizeReduction:3,
                 fun:hollowSquareRoom,
+                extraEnemies:1,
             }
         })
         fancyRoomOptions.push({
@@ -220,6 +223,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             option:{
                 sizeReduction:2,
                 fun:plusRoom,
+                extraEnemies:1,
             }
         })
     }
@@ -230,10 +234,12 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             option:{
                 sizeReduction:4,
                 fun:octoRoom,
+                extraEnemies:3,
             }
         })
     }
 
+    let extraEnemies=0;
     let enemiesAdded=0;
     let rooms=0;
     let endAdded=false;
@@ -251,6 +257,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             const chosenOption = rng.getWeightedElement(fancyRoomOptions);
             chosenRoom = chosenOption.fun;
             sizeReduction = chosenOption.sizeReduction;
+            extraEnemies = chosenOption.extraEnemies;
         }
         const newRoom = chosenRoom([sizeRange[0]-sizeReduction, sizeRange[1]-sizeReduction],rng,roomTheme) as (Tile|null)[][];
         // Put it into a form usable by the hallway maker
@@ -345,7 +352,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
         });
     }
     let totalFood = 0;
-    for(let i=0;i<numCritters;i++) {
+    for(let i=0;i<numCritters+extraEnemies;i++) {
         const chosenOption = rng.getWeightedElement(possibleFoes);
         totalFood += chosenOption.food;
         const foe = new Foe({
@@ -371,7 +378,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     }
     
     // Need food?
-    const expectedHunger = status.hunger - totalFood + 0.5 * (allTiles.filter(x=>x.passable).length / 50);
+    const expectedHunger = status.hunger - totalFood + 0.7 * (allTiles.filter(x=>x.passable).length / 50);
     for(let i=0;i<expectedHunger/4;i++) {
         BuildSpecial("bowl",rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),rng);
     }
