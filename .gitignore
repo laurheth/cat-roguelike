@@ -1,2 +1,6 @@
+# Ignore node modules
 node_modules
+# Don't include the build
 game/script.js
+# Don't include the zipped game.
+*.zip

@@ -149,7 +149,7 @@ const generateApartment = (game:Game)=>{
                 content:'.',
                 classList:['floor'],
             })
-            ItemBuilder("catnip",x);
+            ItemBuilder("catnip",x,game);
         } else if (x.getTileContent() === '*') {
             x.setTile({
                 content:`<img src="./assets/portal.png" alt="Portal">`,
@@ -347,14 +347,16 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
         if(level >= 5 || rng.getRandom() < level * 0.2) {
             ItemBuilder(
                 rng.getRandomElement(specialItems),
-                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
+                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
+                game
             );
         }
     } else {
         specialItems.forEach(item=>{
             ItemBuilder(
                 item,
-                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter))
+                rng.getRandomElement(allTiles.filter(x=>x.passable && !x.critter)),
+                game
             );
         });
     }

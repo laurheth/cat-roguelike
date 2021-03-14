@@ -312,6 +312,7 @@ export default class Game {
 
     /** Wow! You won! */
     win() {
+        this.displayDiv.classList.remove("high");
         this.buildMessage("You have the Mouse of Yendor! Your human will be so pleased to find this in their shoes later on. You can rest easy knowing that they will be fed. Congratulations!","good");
     }
 
@@ -320,6 +321,7 @@ export default class Game {
         const button = document.createElement('button');
         button.addEventListener("click",(e)=>{
             e.preventDefault();
+            this.displayDiv.classList.remove("high");
             this.startGame(this.map,this.player);
         });
         if (dueToDeath) {

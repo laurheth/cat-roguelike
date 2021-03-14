@@ -177,6 +177,9 @@ export default class Foe extends Critter {
                 }
                 const tile = this.currentTile.getNeighbour([i,j]);
                 if (tile && tile.passable) {
+                    if (tile.critter && !(tile.critter instanceof Foe || tile.critter instanceof Player)) {
+                        continue;
+                    }
                     possibleTiles.push({
                         tile:tile,
                         step:[i,j],
@@ -210,6 +213,9 @@ export default class Foe extends Critter {
                     }
                     const tile = this.currentTile.getNeighbour([i,j]);
                     if (tile && tile.passable && tile.lastUpdated === currentVersion) {
+                        if (tile.critter && !(tile.critter instanceof Foe || tile.critter instanceof Player)) {
+                            continue;
+                        }
                         possibleTiles.push({
                             tile:tile,
                             step:[i,j],
@@ -243,6 +249,7 @@ export default class Foe extends Critter {
                 const chosen = this.rng.getRandomElement(this.possibleActions) as actionOption;
                 step = chosen();
             }
+            this.awake--;
             const stepResult = this.step(step[0],step[1]);
             if (stepResult instanceof Player) {
                 this.game.buildMessage(`The ${this.type} ${this.attackVerb} you!`);

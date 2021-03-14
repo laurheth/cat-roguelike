@@ -5,7 +5,7 @@ import Tile from './Tile';
 
 const types = ["bomb","catnip","spring"];
 
-const ItemBuilder = (type:string,tile:Tile) => {
+const ItemBuilder = (type:string,tile:Tile,game:Game) => {
     if(!types.includes(type)) {
         return null;
     }
@@ -21,6 +21,7 @@ const ItemBuilder = (type:string,tile:Tile) => {
             useVerb:"Activate",
             onUse:(me:Item,user:Player,game:Game) => {
                 // The bomb has been planted...
+                const currentLevel = game.level;
                 game.buildMessage("Run!!!","bad");
                 const setTile = user.getTile();
 
@@ -30,32 +31,34 @@ const ItemBuilder = (type:string,tile:Tile) => {
                 game.event.add({
                     delay: 6,
                     callback:()=>{
-                        const boomString:string[] = ['B'];
-                        const numOs = game.random.getNumber(2,4);
-                        const numXs = game.random.getNumber(1,4);
-                        for(let i=0;i<numOs;i++) {
-                            boomString.push('O');
-                        } 
-                        boomString.push('M');
-                        for(let i=0;i<numXs;i++) {
-                            boomString.push('!');
-                        } 
-                        game.buildMessage(boomString.join(""),"good");
-                        setTile.applyToAll((tile:Tile)=>{
-                            if(tile.passable) {
-                                explodedTiles.push(tile);
-                                if(tile.critter) {
-                                    user.gainXP(tile.critter.attackMe(game.random.getNumber(8,15)));
+                        if(game.level === currentLevel) {
+                            const boomString:string[] = ['B'];
+                            const numOs = game.random.getNumber(2,4);
+                            const numXs = game.random.getNumber(1,4);
+                            for(let i=0;i<numOs;i++) {
+                                boomString.push('O');
+                            } 
+                            boomString.push('M');
+                            for(let i=0;i<numXs;i++) {
+                                boomString.push('!');
+                            } 
+                            game.buildMessage(boomString.join(""),"good");
+                            setTile.applyToAll((tile:Tile)=>{
+                                if(tile.passable) {
+                                    explodedTiles.push(tile);
+                                    if(tile.critter) {
+                                        user.gainXP(tile.critter.attackMe(game.random.getNumber(8,15)));
+                                    }
+                                    tile.setContent('*');
+                                    tile.addClass("explosion");
+                                    return true;
+                                } else {
+                                    return false;
                                 }
-                                tile.setContent('*');
-                                tile.addClass("explosion");
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        },4);
-                        // Just in case the player died...
-                        user.fov.look(user.getTile());
+                            },4);
+                            // Just in case the player died...
+                            user.fov.look(user.getTile());
+                        }
                     }
                 });
 
@@ -63,16 +66,18 @@ const ItemBuilder = (type:string,tile:Tile) => {
                 game.event.add({
                     delay: 7,
                     callback:()=>{
-                        explodedTiles.forEach(tile=>{
-                            tile.removeClass("explosion");
-                            tile.setTile({
-                                content:'.',
-                                classList:['floor','scorch']
+                        if(game.level === currentLevel) {
+                            explodedTiles.forEach(tile=>{
+                                tile.removeClass("explosion");
+                                tile.setTile({
+                                    content:'.',
+                                    classList:['floor','scorch']
+                                })
+                                tile.isMess=true;
+                                game.messList.push(tile);
                             })
-                            tile.isMess=true;
-                            game.messList.push(tile);
-                        })
-                        game.messOutOfDate=true;
+                            game.messOutOfDate=true;
+                        }
                     }
                 });
                 return null;
@@ -97,9 +102,11 @@ const ItemBuilder = (type:string,tile:Tile) => {
                     game.event.add({
                         delay: 21,
                         callback:()=>{
-                            game.displayDiv.classList.remove("high");
+                            if(game.displayDiv.classList.contains("high")) {
+                                game.displayDiv.classList.remove("high");
+                                game.buildMessage("The catnip has worn off.","good");
+                            }
                             user.powerful = false;
-                            game.buildMessage("The catnip has worn off.","good");
                         }
                     });
                     return null;

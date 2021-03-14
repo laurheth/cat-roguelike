@@ -101,7 +101,6 @@ class TouchHandler {
 
     // Send the swipe event to the appropriate place
     sendSwipe(swipeString:string) {
-        console.log(swipeString);
         const event:KeyboardEvent = new KeyboardEvent("keydown",{
             key:swipeString
         });
