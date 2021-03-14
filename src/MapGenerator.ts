@@ -6,27 +6,14 @@ import Foe from './Foe';
 import BuildSpecial from './BuildSpecial';
 import Item from './Item';
 import ItemBuilder from './ItemBuilder';
+import { rectangleRoom, octoRoom, plusRoom, octoRoomSmall, hollowSquareRoom } from './Rooms';
 
-/** Rectangleroom */
-const rectangleRoom = (range:[number,number], rng:Random,
-        theme:{[key:string]:string[]}
-    )=>{
-    const plan:string[][] = [];
-    const width = rng.getNumber(...range);
-    const height = rng.getNumber(...range);
-    for(let i=0;i<=width;i++) {
-        const row:string[] = [];
-        for(let j=0;j<=height;j++) {
-            if (i===0 || j===0 || i===width || j===height) {
-                row.push('#');
-            } else {
-                row.push('.');
-            }
-        }
-        plan.push(row);
+interface RoomOption {
+    weight: number;
+    option: {
+        sizeReduction:number;
+        fun:(range:[number,number],rng:Random,theme:{[key:string]:string[]})=>(Tile|null)[][]
     }
-
-    return RoomBuilder(plan,theme);
 }
 
 const addStair = (allTiles:Tile[],rng:Random) => {
@@ -193,18 +180,60 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     let roomTheme = themes[0];
 
     let targetRooms = 5;
+    let maxFancy = 1;
     const sizeRange:[number,number] = [4,6];
     if(level === 10) {
+        maxFancy = 5;
         targetRooms = 14;
         sizeRange[0]=6;
         sizeRange[1]=10;
     } else if (level > 5) {
+        maxFancy = 3;
         targetRooms = 10;
         sizeRange[0]=4;
         sizeRange[1]=8;
     } else if (level>1) {
+        maxFancy = 2;
         targetRooms = 7;
     }
+
+    const fancyRoomOptions:RoomOption[] = [
+        {
+            weight:2,
+            option:{
+                sizeReduction:2,
+                fun:octoRoomSmall
+            }
+        }
+    ];
+
+    if(level > 1) {
+        fancyRoomOptions.push({
+            weight:1,
+            option:{
+                sizeReduction:3,
+                fun:hollowSquareRoom,
+            }
+        })
+        fancyRoomOptions.push({
+            weight:2,
+            option:{
+                sizeReduction:2,
+                fun:plusRoom,
+            }
+        })
+    }
+
+    if(level >= 10) {
+        fancyRoomOptions.push({
+            weight:2,
+            option:{
+                sizeReduction:4,
+                fun:octoRoom,
+            }
+        })
+    }
+
     let enemiesAdded=0;
     let rooms=0;
     let endAdded=false;
@@ -215,7 +244,15 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
             roomTheme = rng.getRandomElement(themes);
         }
         // Make a room
-        const newRoom = rectangleRoom(sizeRange,rng,roomTheme);
+        let chosenRoom = rectangleRoom;
+        let sizeReduction = 0;
+        if(rng.getRandom()>0.5 && maxFancy > 0) {
+            maxFancy--;
+            const chosenOption = rng.getWeightedElement(fancyRoomOptions);
+            chosenRoom = chosenOption.fun;
+            sizeReduction = chosenOption.sizeReduction;
+        }
+        const newRoom = chosenRoom([sizeRange[0]-sizeReduction, sizeRange[1]-sizeReduction],rng,roomTheme) as (Tile|null)[][];
         // Put it into a form usable by the hallway maker
         const roomRow:Tile[] = [];
         newRoom.forEach(row=>row.forEach(col=>{
@@ -368,6 +405,7 @@ const generateMap = (level:number, rng:Random, game:Game)=>{
     if(!startTile) {
         startTile=rng.getRandomElement(allTiles.filter(tile=>tile.passable)) as Tile
     }
+
     return {
         startTile:startTile,
         allTiles:allTiles

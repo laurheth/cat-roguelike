@@ -270,14 +270,14 @@ export default class Tile {
                     continue;
                 }
                 const neighbour1 = this.getNeighbour([i,j]);
-                if(neighbour1) {
+                if(neighbour1 && !neighbour1.passable) {
                     for(let ii=-1;ii<2;ii++) {
                         for(let jj=-1;jj<2;jj++) {
                             if (i+ii === 0 && j+jj === 0) {
                                 continue;
                             }
                             const neighbour2 = this.getNeighbour([i+ii,j+jj]);
-                            if (neighbour2) {
+                            if (neighbour2 && !(neighbour2.getNeighbour([-ii,-jj])?.passable)) {
                                 neighbour1.addNeighbour([ii,jj],neighbour2);
                                 neighbour2.addNeighbour([-ii,-jj],neighbour1);
                             }
